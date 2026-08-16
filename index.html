@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>授業ボード｜AIに「注文」してアプリを作ろう！</title>
+<style>
+  :root {
+    --teal: #0e8c8c; --teal-dark: #0b6b6b; --tint: #e6f4f3;
+    --amber: #f2a93b; --amber-tint: #fdf3e1; --amber-dark: #9a6410;
+    --ink: #1f2933; --gray: #5b6470; --line: #d6e4e3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f4f7f7; color: var(--ink); line-height: 1.7;
+    padding: 0 0 4em;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 4vw; }
+  header {
+    background: var(--teal); color: #fff; padding: 1.1em 0 1.2em; margin-bottom: 1.4em;
+  }
+  header .wrap { padding: 0 4vw; }
+  header .sub { font-size: .95rem; opacity: .92; font-weight: 700; }
+  header h1 { font-size: 1.65rem; font-weight: 800; line-height: 1.35; margin-top: .1em; }
+  h2 {
+    font-size: 1.25rem; font-weight: 800; color: var(--teal-dark);
+    margin: 1.8em 0 .7em; padding-bottom: .3em; border-bottom: 3px solid var(--line);
+  }
+  h2:first-of-type { margin-top: .4em; }
+  .lead { font-size: 1rem; color: var(--gray); margin-bottom: .9em; }
+
+  /* 教材ボタン */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .8em; }
+  a.tile {
+    display: block; background: #fff; border: 2px solid var(--line); border-radius: .8em;
+    padding: 1em 1.1em; text-decoration: none; color: var(--ink);
+  }
+  a.tile:active { background: var(--tint); }
+  a.tile .emoji { font-size: 1.7rem; line-height: 1; }
+  a.tile .t { display: block; font-weight: 800; font-size: 1.15rem; margin-top: .25em; color: var(--teal-dark); }
+  a.tile .d { display: block; font-size: .9rem; color: var(--gray); }
+
+  /* 注文文カード */
+  .prompt { background: #fff; border: 2px solid var(--line); border-radius: .8em; padding: 1em 1.1em; margin-bottom: .9em; }
+  .prompt.warm { border-color: #f0d9ae; background: var(--amber-tint); }
+  .prompt h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: .1em; }
+  .prompt .tag { font-size: .85rem; color: var(--gray); font-weight: 700; }
+  .prompt .body {
+    background: #f7fbfb; border: 1px solid var(--line); border-radius: .5em;
+    padding: .8em .9em; margin: .6em 0 .7em; font-size: 1.02rem;
+    -webkit-user-select: text; user-select: text; white-space: pre-wrap;
+  }
+  .prompt.warm .body { background: #fffaf1; border-color: #f0d9ae; }
+  .prompt .step { font-size: .95rem; color: var(--amber-dark); font-weight: 700; margin-bottom: .3em; }
+  button.copy {
+    font-family: inherit; font-size: 1.05rem; font-weight: 800; cursor: pointer;
+    border: 0; border-radius: .6em; padding: .75em 1.4em; width: 100%;
+    background: var(--amber); color: #3b2a06;
+  }
+  button.copy:active { background: #e09a2b; }
+  button.copy.done { background: var(--teal); color: #fff; }
+
+  /* slido */
+  .slido {
+    background: #fff; border: 2px solid var(--teal); border-radius: .8em; padding: 1.1em;
+    text-align: center;
+  }
+  .slido .code { font-size: 2rem; font-weight: 800; letter-spacing: .06em; color: var(--teal-dark); }
+  .slido a.go {
+    display: block; margin-top: .7em; background: var(--teal); color: #fff;
+    text-decoration: none; font-weight: 800; font-size: 1.15rem;
+    border-radius: .6em; padding: .75em 1em;
+  }
+  .slido .note { font-size: .92rem; color: var(--gray); margin-top: .5em; }
+
+  /* 完成コード（こまったとき用・折りたたみ） */
+  details.kansei { background: #fff; border: 2px dashed var(--gray); border-radius: .8em; margin-top: .9em; }
+  details.kansei > summary {
+    cursor: pointer; font-weight: 800; font-size: 1.05rem; padding: .9em 1.1em; list-style: none;
+  }
+  details.kansei > summary::-webkit-details-marker { display: none; }
+  details.kansei > summary::before { content: "▶ "; color: var(--gray); }
+  details.kansei[open] > summary::before { content: "▼ "; }
+  details.kansei .kbody { padding: 0 1.1em 1.1em; }
+  details.kansei .note { font-size: .92rem; color: var(--gray); margin-bottom: .9em; }
+  .krow { display: flex; gap: .6em; align-items: stretch; }
+  a.play {
+    flex: 0 0 auto; display: flex; align-items: center; text-decoration: none;
+    background: var(--teal); color: #fff; font-weight: 800; font-size: 1rem;
+    border-radius: .6em; padding: .75em 1.1em;
+  }
+  .krow button.copy { flex: 1; }
+  ul.help { list-style: none; background: #fff; border: 2px solid var(--line); border-radius: .8em; padding: .9em 1.1em; }
+  ul.help li { padding: .35em 0 .35em 1.9em; position: relative; }
+  ul.help li .ic { position: absolute; left: 0; top: .35em; }
+  footer { margin-top: 2.5em; font-size: .88rem; color: var(--gray); text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="sub">生成AIプログラミング体験 2026</div>
+    <h1>授業ボード<br>AIに「注文」してアプリを作ろう！</h1>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>① さわって理解する</h2>
+  <p class="lead">AIのしくみを、指で動かして確かめよう。</p>
+  <div class="grid">
+    <a class="tile" href="sim-tsugi-no-kotoba.html">
+      <span class="emoji">🎲</span>
+      <span class="t">次の言葉ガチャ</span>
+      <span class="d">AIは「次の言葉」を確率で選んでいるだけ</span>
+    </a>
+    <a class="tile" href="sim-kotoba-no-chizu.html">
+      <span class="emoji">🗺️</span>
+      <span class="t">ことばの地図</span>
+      <span class="d">意味が近い言葉は、近くにいる</span>
+    </a>
+  </div>
+
+  <h2>② 注文文をコピーする</h2>
+  <p class="lead">好きなものを1つえらんで、「コピー」を押す → Gemini に貼りつけ。</p>
+
+  <div class="prompt">
+    <h3>🐹 A. もぐらたたき</h3>
+    <div class="tag">定番アクション。まずはこれ！</div>
+    <div class="body" id="pA">外部ライブラリなしの単一HTMLで、もぐらたたきゲームを作ってください。絵文字のモグラが9個の穴からランダムに顔を出し、タップすると1点。30秒間のスコアを競えるようにしてください</div>
+    <button class="copy" data-target="pA" type="button">📋 コピーする</button>
+  </div>
+
+  <div class="prompt">
+    <h3>🥠 B. おみくじ</h3>
+    <div class="tag">いちばん かんたん</div>
+    <div class="body" id="pB">外部ライブラリなしの単一HTMLで、ボタンを押すと今日の運勢と応援メッセージが絵文字つきで表示されるおみくじアプリを作ってください</div>
+    <button class="copy" data-target="pB" type="button">📋 コピーする</button>
+  </div>
+
+  <div class="prompt">
+    <h3>⚡ C. 反応速度ゲーム</h3>
+    <div class="tag">昨年のリベンジ</div>
+    <div class="body" id="pC">外部ライブラリなしの単一HTMLで、ボタンの色が変わってからできるだけ早くタップする反応速度ゲームを作ってください</div>
+    <button class="copy" data-target="pC" type="button">📋 コピーする</button>
+  </div>
+
+  <div class="prompt warm">
+    <h3>🚀 D. 自由 × エージェント風</h3>
+    <div class="tag">経験者むけ。2段階で注文しよう</div>
+    <div class="step">① まず、これを送る</div>
+    <div class="body" id="pD1">反応速度ゲームより面白いミニゲームの仕様を、3行で提案して</div>
+    <button class="copy" data-target="pD1" type="button">📋 ①をコピーする</button>
+    <div class="step" style="margin-top:.9em;">② 返事が来たら、これを送る</div>
+    <div class="body" id="pD2">その仕様を、外部ライブラリなしの単一HTMLで実装して</div>
+    <button class="copy" data-target="pD2" type="button">📋 ②をコピーする</button>
+  </div>
+
+  <h2>③ うごかす</h2>
+  <p class="lead">ふつうは Gemini の画面の中でそのまま動きます（プレビュー）。動かないときだけ、下のページを使ってください。</p>
+  <div class="grid">
+    <a class="tile" href="hatte-jikkou.html">
+      <span class="emoji">🖥️</span>
+      <span class="t">貼って実行</span>
+      <span class="d">コードを貼って「▶うごかす」</span>
+    </a>
+    <a class="tile" href="slides.html">
+      <span class="emoji">📚</span>
+      <span class="t">スライド</span>
+      <span class="d">今日の授業スライド（25枚）</span>
+    </a>
+  </div>
+
+  <h2>④ 質問・投票・作品の共有</h2>
+  <div class="slido">
+    <div>slido イベントコード</div>
+    <div class="code" style="font-size:1.1rem; letter-spacing:0;">当日ご案内します</div>
+    <div class="note">質問は<b>名前を書かなくてOK</b>です。作品のスクリーンショットもここへ。</div>
+  </div>
+
+  <h2>こまったときは</h2>
+  <ul class="help">
+    <li><span class="ic">🔁</span>もう一度おなじ注文をする（結果は毎回変わります）</li>
+    <li><span class="ic">🆕</span>新しいチャットでやり直す</li>
+    <li><span class="ic">🥠</span>かんたんな B（おみくじ）に切りかえる</li>
+    <li><span class="ic">📋</span>コピーは「コードをコピー」ボタンで</li>
+    <li><span class="ic">🙋</span>手を上げて先生を呼ぶ（slido に書いてもOK）</li>
+  </ul>
+
+  <details class="kansei">
+    <summary>🆘 どうしても動かないとき：完成コード</summary>
+    <div class="kbody">
+      <p class="note">まずは自分でAIに注文してみよう！ どうしても動かないときだけ、ここのコードをコピーして「貼って実行」に貼りつけてください。動いたら、そこから<b>改造の注文</b>をAIにお願いすればOKです。</p>
+
+      <div class="prompt">
+        <h3>🐹 A. もぐらたたき</h3>
+        <div class="krow">
+          <a class="play" href="kansei/a-mogura.html">▶ 見本で遊ぶ</a>
+          <button class="copy" data-file="kansei/a-mogura.html" type="button">📋 コードをコピー</button>
+        </div>
+      </div>
+
+      <div class="prompt">
+        <h3>🥠 B. おみくじ</h3>
+        <div class="krow">
+          <a class="play" href="kansei/b-omikuji.html">▶ 見本で遊ぶ</a>
+          <button class="copy" data-file="kansei/b-omikuji.html" type="button">📋 コードをコピー</button>
+        </div>
+      </div>
+
+      <div class="prompt">
+        <h3>⚡ C. 反応速度ゲーム</h3>
+        <div class="krow">
+          <a class="play" href="kansei/c-hannou.html">▶ 見本で遊ぶ</a>
+          <button class="copy" data-file="kansei/c-hannou.html" type="button">📋 コードをコピー</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <footer>筑波技術大学 産業技術学部 産業情報学科 白石研究室<br>「生成AIプログラミング体験 2026」</footer>
+</div>
+
+<script>
+  function copyText(text, btn) {
+    function ok() {
+      var old = btn.textContent;
+      btn.textContent = "✅ コピーしました！";
+      btn.classList.add("done");
+      setTimeout(function () { btn.textContent = old; btn.classList.remove("done"); }, 1800);
+    }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      var done = false;
+      try { done = document.execCommand("copy"); } catch (e) { done = false; }
+      document.body.removeChild(ta);
+      if (done) { ok(); }
+      else { btn.textContent = "長押しで選んでコピーしてね"; }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, fallback);
+    } else {
+      fallback();
+    }
+  }
+  /* 完成コードは読み込んでおく。タップした瞬間に同期でコピーしないと
+     iPad の Safari がクリップボードへの書き込みを拒否するため。 */
+  var fileCache = {};
+  Array.prototype.forEach.call(document.querySelectorAll("button.copy[data-file]"), function (btn) {
+    var url = btn.getAttribute("data-file");
+    fetch(url).then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (t) { if (t) fileCache[url] = t.trim(); })
+      .catch(function () {});
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("button.copy"), function (btn) {
+    btn.addEventListener("click", function () {
+      var file = btn.getAttribute("data-file");
+      if (file) {
+        if (fileCache[file]) { copyText(fileCache[file], btn); return; }
+        var old = btn.textContent;
+        btn.textContent = "読み込み中…";
+        fetch(file).then(function (r) { return r.text(); }).then(function (t) {
+          fileCache[file] = t.trim();
+          btn.textContent = old;
+          copyText(fileCache[file], btn);
+        }).catch(function () { btn.textContent = "読み込めませんでした"; });
+        return;
+      }
+      copyText(document.getElementById(btn.getAttribute("data-target")).textContent.trim(), btn);
+    });
+  });
+</script>
+</body>
+</html>

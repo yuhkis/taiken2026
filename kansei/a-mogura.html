@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>もぐらたたき</title>
+<style>
+body{font-family:sans-serif;text-align:center;background:#f0f7f0;margin:0;padding:16px;-webkit-user-select:none;user-select:none}
+h1{font-size:22px;margin:8px 0}
+#info{font-size:20px;font-weight:bold;margin:8px 0}
+#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:340px;margin:12px auto}
+.hole{aspect-ratio:1;background:#8d6e63;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;border:none}
+.hole:active{background:#6d4c41}
+#start{font-size:20px;padding:12px 28px;border:none;border-radius:10px;background:#2e7d32;color:#fff;font-weight:bold}
+</style></head><body>
+<h1>🐹 もぐらたたき</h1>
+<div id="info"></div>
+<div id="grid"></div>
+<button id="start">スタート</button>
+<script>
+var holes=[],score=0,time=30,playing=false,mole=-1,tid=null,mid=null;
+var g=document.getElementById('grid');
+for(var i=0;i<9;i++){var b=document.createElement('button');b.className='hole';b.dataset.i=i;g.appendChild(b);holes.push(b);}
+var info=document.getElementById('info'),startBtn=document.getElementById('start');
+function draw(){info.textContent='スコア: '+score+' ／ のこり: '+time+'秒';}
+g.addEventListener('click',function(e){
+  var b=e.target.closest('.hole');
+  if(!b||!playing)return;
+  if(+b.dataset.i===mole){score++;b.textContent='';mole=-1;draw();}
+});
+function pop(){
+  if(mole>=0)holes[mole].textContent='';
+  mole=Math.floor(Math.random()*9);
+  holes[mole].textContent='🐹';
+}
+function end(){
+  playing=false;clearInterval(tid);clearInterval(mid);
+  if(mole>=0){holes[mole].textContent='';mole=-1;}
+  info.textContent='おわり！ スコアは '+score+' 点';
+  startBtn.textContent='もう一度';
+}
+startBtn.addEventListener('click',function(){
+  if(playing)return;
+  score=0;time=30;playing=true;draw();
+  startBtn.textContent='プレイ中...';
+  mid=setInterval(pop,800);pop();
+  tid=setInterval(function(){time--;draw();if(time<=0)end();},1000);
+});
+draw();
+</script></body></html>

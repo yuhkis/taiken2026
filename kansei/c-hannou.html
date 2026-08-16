@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>反応速度ゲーム</title>
+<style>
+body{font-family:sans-serif;text-align:center;margin:0;padding:24px;background:#eceff1;-webkit-user-select:none;user-select:none}
+h1{font-size:22px}
+#pad{width:100%;max-width:360px;height:220px;margin:20px auto;border-radius:16px;background:#b0bec5;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:#fff}
+#pad.ready{background:#c62828}
+#pad.go{background:#2e7d32}
+#log{font-size:18px;font-weight:bold;min-height:50px}
+</style></head><body>
+<h1>⚡ 反応速度ゲーム</h1>
+<div id="pad">タップしてスタート</div>
+<div id="log">緑になったら、できるだけ早くタップ！</div>
+<script>
+var pad=document.getElementById('pad'),log=document.getElementById('log');
+var state='idle',t0=0,timer=null,best=null;
+pad.addEventListener('click',function(){
+  if(state==='idle'){
+    state='ready';pad.className='ready';pad.textContent='まだ！ 緑になるまで待つ';
+    log.textContent='...';
+    timer=setTimeout(function(){
+      state='go';pad.className='go';pad.textContent='いま！ タップ！';t0=Date.now();
+    },1500+Math.random()*3000);
+  }else if(state==='ready'){
+    clearTimeout(timer);state='idle';pad.className='';pad.textContent='タップしてスタート';
+    log.textContent='早すぎ！ 緑になってからタップしてね';
+  }else if(state==='go'){
+    var ms=Date.now()-t0;state='idle';pad.className='';pad.textContent='もう一度';
+    if(best===null||ms<best)best=ms;
+    log.textContent=ms+' ミリ秒！　ベスト: '+best+' ミリ秒';
+  }
+});
+</script></body></html>

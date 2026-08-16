@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ことばの地図 — 単語ベクトルを体感（筑波技術大学 白石研究室）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f4f7f7; color: #1f2933; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 10px;
+  }
+  h1 { font-size: clamp(20px, 4vw, 30px); color: #0b6b6b; margin: 4px 0 2px; }
+  .lead { font-size: clamp(13px, 2.6vw, 18px); color: #6b7280; margin-bottom: 8px; text-align: center; }
+  #stage { width: 100%; max-width: 820px; background: #fff; border: 3px solid #0e8c8c; border-radius: 14px; }
+  /* 横長で背の低い画面（スライドへの埋め込み時）では地図の高さを抑える。
+     こうしないと下の「魔法の計算」ボタンが画面外に出てしまう。 */
+  svg { width: 100%; height: auto; max-height: 56vh; display: block; touch-action: manipulation; }
+  .word { cursor: pointer; }
+  .word rect { fill: #e6f4f3; stroke: #0e8c8c; stroke-width: 1.5; rx: 10; }
+  .word text { font-size: 26px; font-weight: 700; fill: #1f2933; pointer-events: none; }
+  .word.sel rect { fill: #f2a93b; }
+  .word.near rect { fill: #9fd6d4; }
+  .word.ans rect { fill: #ffd6e0; stroke: #d6336c; }
+  .link { stroke: #0b6b6b; stroke-width: 2.5; stroke-dasharray: 6 5; opacity: 0; }
+  #arrow1, #arrow2 { stroke: #d6336c; stroke-width: 4; opacity: 0; marker-end: url(#ah); }
+  #msg { font-size: clamp(15px, 3vw, 21px); font-weight: 700; color: #0b6b6b; min-height: 1.6em; margin: 8px 4px; text-align: center; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
+  button.big {
+    font-family: inherit; font-size: clamp(15px, 3vw, 20px); font-weight: 700;
+    border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer;
+  }
+  #magicBtn { background: #f2a93b; color: #1f2933; }
+  #clearBtn { background: #0b6b6b; color: #fff; }
+  footer { margin-top: auto; padding-top: 10px; font-size: 12px; color: #6b7280; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>🗺️ ことばの地図（単語ベクトル）</h1>
+  <p class="lead">AIの中では、言葉は「数字の座標」＝ベクトル。<b>意味が近い言葉は、近くにいる！</b>　言葉をタップしてみよう</p>
+  <div id="stage"></div>
+  <div id="msg">ことばをタップすると、「意味が近いなかま」が光ります</div>
+  <div class="controls">
+    <button class="big" id="magicBtn">✨ 魔法の計算：王様 − 男性 ＋ 女性 ＝ ？</button>
+    <button class="big" id="clearBtn">けす</button>
+  </div>
+  <footer>本物のAIは 数百〜数千次元。この地図は2次元に「ぎゅっ」とつぶした教材版です ／ 筑波技術大学 白石研究室</footer>
+<script>
+  var W = 820, H = 560;
+  var WORDS = [
+    // 天気クラスタ（左上）
+    ["晴れ", 150, 95], ["太陽", 235, 60], ["天気", 215, 150], ["雨", 90, 175], ["雪", 60, 105],
+    // 動物クラスタ（右上）
+    ["犬", 600, 80], ["猫", 680, 110], ["うさぎ", 585, 155], ["モグラ", 700, 185],
+    // 食べ物クラスタ（左下）
+    ["パン", 105, 415], ["ごはん", 215, 452], ["ラーメン", 85, 508], ["カレー", 205, 393],
+    // 王族＋人（中央〜右下）
+    ["王様", 430, 300], ["王子", 520, 275], ["女王", 430, 430], ["男性", 620, 330], ["女性", 620, 460],
+    // 学校（右下すみ）
+    ["先生", 730, 400], ["生徒", 745, 480]
+  ];
+  var stage = document.getElementById("stage");
+  var msg = document.getElementById("msg");
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  stage.appendChild(svg);
+
+  var defs = document.createElementNS(NS, "defs");
+  defs.innerHTML = '<marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 z" fill="#d6336c"/></marker>';
+  svg.appendChild(defs);
+
+  // 薄い軸
+  var axes = document.createElementNS(NS, "g");
+  axes.innerHTML = '<line x1="40" y1="' + (H - 40) + '" x2="' + (W - 20) + '" y2="' + (H - 40) + '" stroke="#d8e2e2" stroke-width="2"/>' +
+    '<line x1="40" y1="' + (H - 40) + '" x2="40" y2="20" stroke="#d8e2e2" stroke-width="2"/>';
+  svg.appendChild(axes);
+
+  var linkLayer = document.createElementNS(NS, "g");
+  svg.appendChild(linkLayer);
+  var arrow1 = document.createElementNS(NS, "line"); arrow1.id = "arrow1"; svg.appendChild(arrow1);
+  var arrow2 = document.createElementNS(NS, "line"); arrow2.id = "arrow2"; svg.appendChild(arrow2);
+
+  var nodes = {};
+  WORDS.forEach(function (wd) {
+    var name = wd[0], x = wd[1], y = wd[2];
+    var g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "word");
+    var padX = 16, fs = 26, w = name.length * fs + padX * 2, h = 50;
+    g.innerHTML = '<rect x="' + (x - w / 2) + '" y="' + (y - h / 2) + '" width="' + w + '" height="' + h + '" rx="10"/>' +
+      '<text x="' + x + '" y="' + (y + 7) + '" text-anchor="middle">' + name + '</text>';
+    g.addEventListener("click", function () { select(name); });
+    svg.appendChild(g);
+    nodes[name] = { g: g, x: x, y: y };
+  });
+
+  function dist(a, b) { return Math.hypot(nodes[a].x - nodes[b].x, nodes[a].y - nodes[b].y); }
+
+  function clearAll() {
+    Object.keys(nodes).forEach(function (n) { nodes[n].g.setAttribute("class", "word"); });
+    linkLayer.innerHTML = "";
+    arrow1.style.opacity = 0; arrow2.style.opacity = 0;
+    msg.textContent = "ことばをタップすると、「意味が近いなかま」が光ります";
+  }
+
+  function select(name) {
+    clearAll();
+    nodes[name].g.setAttribute("class", "word sel");
+    var others = Object.keys(nodes).filter(function (n) { return n !== name; });
+    others.sort(function (a, b) { return dist(name, a) - dist(name, b); });
+    var near = others.slice(0, 3);
+    near.forEach(function (n) {
+      nodes[n].g.setAttribute("class", "word near");
+      var l = document.createElementNS(NS, "line");
+      l.setAttribute("class", "link");
+      l.setAttribute("x1", nodes[name].x); l.setAttribute("y1", nodes[name].y);
+      l.setAttribute("x2", nodes[n].x); l.setAttribute("y2", nodes[n].y);
+      linkLayer.appendChild(l);
+      requestAnimationFrame(function () { l.style.transition = "opacity .5s"; l.style.opacity = 1; });
+    });
+    msg.textContent = "「" + name + "」に意味が近いのは： " + near.join("、") + "　（地図の上でも近い！）";
+  }
+
+  document.getElementById("magicBtn").addEventListener("click", function () {
+    clearAll();
+    nodes["王様"].g.setAttribute("class", "word sel");
+    nodes["男性"].g.setAttribute("class", "word near");
+    nodes["女性"].g.setAttribute("class", "word near");
+    msg.textContent = "「男性→女性」の方向に、王様から進むと…？";
+    // 男性→女性 ベクトル
+    arrow1.setAttribute("x1", nodes["男性"].x); arrow1.setAttribute("y1", nodes["男性"].y);
+    arrow1.setAttribute("x2", nodes["女性"].x); arrow1.setAttribute("y2", nodes["女性"].y);
+    arrow1.style.transition = "opacity .5s"; arrow1.style.opacity = 1;
+    var dx = nodes["女性"].x - nodes["男性"].x, dy = nodes["女性"].y - nodes["男性"].y;
+    setTimeout(function () {
+      arrow2.setAttribute("x1", nodes["王様"].x); arrow2.setAttribute("y1", nodes["王様"].y);
+      arrow2.setAttribute("x2", nodes["王様"].x + dx); arrow2.setAttribute("y2", nodes["王様"].y + dy);
+      arrow2.style.transition = "opacity .5s"; arrow2.style.opacity = 1;
+    }, 700);
+    setTimeout(function () {
+      nodes["女王"].g.setAttribute("class", "word ans");
+      msg.textContent = "王様 − 男性 ＋ 女性 ≈ 女王！　AIは「意味の計算」ができる✨";
+    }, 1600);
+  });
+  document.getElementById("clearBtn").addEventListener("click", clearAll);
+</script>
+</body>
+</html>

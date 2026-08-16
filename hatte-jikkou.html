@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>貼って実行 — AIが作ったコードを動かそう（筑波技術大学 白石研究室）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+    display: flex; flex-direction: column; background: #f4f7f7; color: #1f2933;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: #0e8c8c; color: #fff; flex-wrap: wrap;
+  }
+  header h1 { font-size: 18px; font-weight: 700; flex: 1; min-width: 200px; }
+  button {
+    font-family: inherit; font-size: 18px; font-weight: 700; border: 0;
+    border-radius: 10px; padding: 12px 20px; cursor: pointer;
+  }
+  #runBtn { background: #f2a93b; color: #1f2933; }
+  #backBtn { background: #ffffff; color: #0b6b6b; display: none; }
+  #clearBtn { background: #0b6b6b; color: #fff; font-size: 15px; padding: 12px 14px; }
+  main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #editorPane { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 12px; gap: 8px; }
+  #hint { font-size: 16px; color: #0b6b6b; font-weight: 700; }
+  textarea {
+    flex: 1; width: 100%; min-height: 0; resize: none; font-family: Menlo, Consolas, monospace;
+    font-size: 14px; line-height: 1.5; padding: 12px; border: 2px solid #0e8c8c;
+    border-radius: 10px; background: #fff; -webkit-user-select: text;
+  }
+  #resultPane { flex: 1; display: none; min-height: 0; background: #fff; }
+  #frame { width: 100%; height: 100%; border: 0; }
+  footer { padding: 6px 14px; font-size: 12px; color: #6b7280; background: #f4f7f7; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🖥️ 貼って実行 — AIのコードを動かそう</h1>
+    <button id="clearBtn" type="button">🗑 けす</button>
+    <button id="runBtn" type="button">▶ うごかす</button>
+    <button id="backBtn" type="button">✏️ コードにもどる</button>
+  </header>
+  <main>
+    <div id="editorPane">
+      <div id="hint">① AIの「コードをコピー」を押す → ② 下の枠を長押しして「ペースト」 → ③ 上の「▶ うごかす」</div>
+      <textarea id="code" placeholder="ここに AIが作ったコード（HTML）を貼ってね" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    </div>
+    <div id="resultPane"><iframe id="frame" sandbox="allow-scripts allow-modals allow-popups" title="実行結果"></iframe></div>
+  </main>
+  <footer>筑波技術大学 産業技術学部 産業情報学科 白石研究室 ／ このページはコードをどこにも送信しません（この画面の中だけで動きます）</footer>
+<script>
+  var codeEl = document.getElementById("code");
+  var editorPane = document.getElementById("editorPane");
+  var resultPane = document.getElementById("resultPane");
+  var runBtn = document.getElementById("runBtn");
+  var backBtn = document.getElementById("backBtn");
+  var clearBtn = document.getElementById("clearBtn");
+  var frame = document.getElementById("frame");
+
+  function extractHtml(text) {
+    // コードブロック記号 ```html ～ ``` が混ざっていても取り除く
+    var m = text.match(/```(?:html)?\s*([\s\S]*?)```/i);
+    if (m) return m[1];
+    return text;
+  }
+
+  runBtn.addEventListener("click", function () {
+    var src = extractHtml(codeEl.value.trim());
+    if (!src) { alert("まず、コードを貼ってね！"); return; }
+    frame.srcdoc = src;
+    editorPane.style.display = "none";
+    resultPane.style.display = "block";
+    runBtn.style.display = "none";
+    clearBtn.style.display = "none";
+    backBtn.style.display = "inline-block";
+  });
+
+  backBtn.addEventListener("click", function () {
+    resultPane.style.display = "none";
+    editorPane.style.display = "flex";
+    backBtn.style.display = "none";
+    runBtn.style.display = "inline-block";
+    clearBtn.style.display = "inline-block";
+    frame.srcdoc = "";
+  });
+
+  clearBtn.addEventListener("click", function () {
+    if (codeEl.value && !confirm("コードを全部けしていい？")) return;
+    codeEl.value = "";
+    codeEl.focus();
+  });
+</script>
+</body>
+</html>

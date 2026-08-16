@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIに「注文」してアプリを作ろう！（2026 体験授業）</title>
+<style>
+  :root {
+    --teal: #0e8c8c; --teal-dark: #0b6b6b; --tint: #e6f4f3;
+    --amber: #f2a93b; --amber-tint: #fdf3e1; --amber-dark: #b97a14;
+    --ink: #1f2933; --gray: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: #101416; font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif; overflow: hidden; }
+  .slide {
+    display: none; position: absolute; inset: 0; margin: auto;
+    width: min(100vw, 133.33vh); height: min(75vw, 100vh);
+    background: #fff; color: var(--ink);
+    padding: 4.5% 5% 5.5%;
+    flex-direction: column;
+    font-size: min(2.95vw, 3.93vh); /* 基準: 本文 約1em＝大きめ（遠い席から読める）。内容が多いスライドはJSが自動で少し縮める */
+    line-height: 1.5;
+  }
+  .slide.active { display: flex; }
+  /* 縦に潰れて文字が重なるのを防ぐ（はみ出しは自動フィットが検知して縮小する） */
+  .slide > *:not(.cols):not(.simwrap) { flex-shrink: 0; }
+  .slide.img-slide { padding: 0; justify-content: center; align-items: center; }
+  .img-slide img { width: 100%; height: 100%; object-fit: contain; }
+  .kicker { color: var(--teal); font-weight: 700; font-size: .8em; margin-bottom: .2em; }
+  h2 { font-size: 1.5em; font-weight: 800; margin-bottom: .6em; }
+  h2 .small { font-size: .62em; color: var(--gray); font-weight: 700; }
+  ul.big { list-style: none; }
+  ul.big li { padding-left: 1.1em; position: relative; margin-bottom: .7em; }
+  ul.big li::before { content: "●"; color: var(--teal); position: absolute; left: 0; font-size: .7em; top: .28em; }
+  .card { background: var(--tint); border-radius: .55em; padding: .62em .9em; margin-bottom: .6em; }
+  .card.warm { background: var(--amber-tint); }
+  .accent { color: var(--amber-dark); font-weight: 700; }
+  .teal { color: var(--teal-dark); font-weight: 700; }
+  .gray { color: var(--gray); }
+  .num {
+    display: inline-flex; justify-content: center; align-items: center;
+    width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--teal);
+    color: #fff; font-weight: 800; margin-right: .5em; flex-shrink: 0; font-size: .95em;
+  }
+  .row { display: flex; align-items: flex-start; gap: .5em; margin-bottom: .72em; }
+  .qrimg { border-radius: .3em; background: #fff; }
+  .qrbox {
+    border: 3px dashed var(--gray); border-radius: .5em; background: #fafafa;
+    display: flex; justify-content: center; align-items: center; text-align: center;
+    color: var(--gray); font-weight: 700; font-size: .62em; line-height: 1.4;
+  }
+  .cols { display: flex; gap: 1em; flex: 1; min-height: 0; }
+  .col { flex: 1; min-width: 0; }
+  /* 2段組みの中身は縦位置を中央に寄せる（下に大きな余白が残るのを防ぐ） */
+  .col:not(.card) { display: flex; flex-direction: column; justify-content: center; }
+  /* 段の中のカードも潰さない。潰れると自動フィットが過剰に縮小してしまう */
+  .col > .card { flex-shrink: 0; }
+  /* 21枚目: カリキュラム（令和7年度以降カリキュラム・情報科学コース） */
+  .col.curr { justify-content: flex-start; gap: .45em; }
+  .curr .ch {
+    background: var(--teal); color: #fff; font-weight: 800; text-align: center;
+    border-radius: .4em; padding: .22em 0; font-size: .92em; letter-spacing: .02em;
+  }
+  .curr .ci {
+    background: var(--tint); border-radius: .4em; padding: .45em .55em;
+    font-weight: 700; font-size: .78em; line-height: 1.35;
+  }
+  .curr .ci.mine { background: var(--amber-tint); color: var(--amber-dark); }
+  .curr .ci.mine::before { content: "★ "; }
+  /* 「今日の教材 → 本物 → 大学1年の必修」の対応表 */
+  .mgrid { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: .38em; font-size: .82em; }
+  .mgrid .mh {
+    background: var(--teal); color: #fff; font-weight: 800; text-align: center;
+    border-radius: .35em; padding: .18em 0;
+  }
+  .mgrid .mc { background: var(--tint); border-radius: .35em; padding: .42em .6em; line-height: 1.3; }
+  .mgrid .mc.real { background: #eaf1f8; }
+  .mgrid .mc.sub {
+    background: var(--amber-tint); color: var(--amber-dark); font-weight: 800;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  footer.pagenum {
+    position: absolute; bottom: 1.2%; left: 0; right: 0; text-align: center;
+    font-size: .55em; color: var(--gray);
+  }
+  /* 昨年スライドの画像には元のページ番号が焼き込まれている。
+     白いチップで覆い、今年の番号だけが見えるようにする。 */
+  .img-slide footer.pagenum {
+    bottom: .5%; left: 50%; right: auto; transform: translateX(-50%);
+    background: #fff; padding: .1em 1.6em; border-radius: .3em;
+  }
+  /* 演習タイマー */
+  .timer {
+    width: 100%; border: .12em solid var(--teal); border-radius: .5em;
+    background: var(--tint); text-align: center; padding: .25em 0 .3em; cursor: pointer;
+    -webkit-user-select: none; user-select: none;
+  }
+  .timer .tval {
+    font-size: 2.1em; font-weight: 800; line-height: 1.05; color: var(--teal-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .timer .thint { font-size: .55em; color: var(--gray); font-weight: 700; }
+  .timer.warn { border-color: var(--amber); background: var(--amber-tint); }
+  .timer.warn .tval { color: var(--amber-dark); }
+  .timer.over { border-color: #c0392b; background: #fdecea; }
+  .timer.over .tval { color: #c0392b; }
+  /* ナビ */
+  #nav {
+    position: fixed; right: 10px; bottom: 8px; z-index: 50; display: flex; gap: 8px;
+  }
+  #nav button {
+    font-size: 22px; width: 46px; height: 40px; border: 0; border-radius: 10px;
+    background: rgba(14,140,140,.85); color: #fff; cursor: pointer; font-weight: 700;
+  }
+  #counter { position: fixed; left: 12px; bottom: 12px; color: #9ab; font-size: 14px; z-index: 50; }
+  iframe.sim { width: 100%; height: 100%; border: 2px solid var(--tint); border-radius: .5em; background: #f4f7f7; }
+  .simwrap { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .25em; }
+  .simfoot { font-size: .62em; color: var(--gray); }
+  /* 教材を埋め込むスライドは、枠を最大限とる。
+     ことばの地図の「魔法の計算」ボタンまで画面に入れるため。 */
+  .slide.sim-slide { padding: 2.6% 3.2% 3.4%; }
+  .sim-slide h2 { font-size: 1.15em; margin-bottom: .22em; }
+  a { color: var(--teal-dark); }
+  /* タップで写真の一点にズームインする図（22枚目のHaptStarter）。
+     --fx / --fy でズームの中心を写真ごとに指定する。 */
+  .zoomshot {
+    position: relative; width: 100%; aspect-ratio: var(--ar, 16 / 9); overflow: hidden;
+    border-radius: .4em; border: 2px solid var(--tint); cursor: pointer;
+  }
+  /* 枠の縦横比を決め打ちにして、写真が縦に伸びて本文を圧迫しないようにする。
+     写真のどこを残すかは --op（object-position）で調整する。 */
+  .zoomshot img {
+    width: 100%; height: 100%; object-fit: cover; object-position: var(--op, 50% 60%);
+    display: block;
+    transition: transform 1.05s cubic-bezier(.4, 0, .2, 1);
+  }
+  /* --fx / --fy を画面の中央へ寄せてから拡大する。
+     clamp() で寄せ幅を頭打ちにしているので、端の一点を指定しても余白は出ない。 */
+  .zoomshot.z img {
+    transform: scale(var(--zs, 2.6))
+      translate(
+        calc(50% - clamp(calc(50% / var(--zs, 2.6)), var(--fx, 50%), calc(100% - 50% / var(--zs, 2.6)))),
+        calc(50% - clamp(calc(50% / var(--zs, 2.6)), var(--fy, 50%), calc(100% - 50% / var(--zs, 2.6))))
+      );
+  }
+  .zoomshot .zring {
+    position: absolute; left: var(--fx, 50%); top: var(--fy, 50%);
+    width: 14%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    border: .16em solid var(--amber); border-radius: 50%;
+    animation: zpulse 1.8s ease-out infinite; transition: opacity .35s;
+  }
+  .zoomshot.z .zring { opacity: 0; }
+  @keyframes zpulse {
+    0% { box-shadow: 0 0 0 0 rgba(242, 169, 59, .8); }
+    70% { box-shadow: 0 0 0 .9em rgba(242, 169, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(242, 169, 59, 0); }
+  }
+  .banner {
+    position: absolute; left: 3%; bottom: 3%; width: 45%;
+    background: var(--amber-tint); border-radius: .5em; padding: .5em .7em;
+    font-size: .62em; font-weight: 700; color: var(--amber-dark); line-height: 1.35;
+  }
+</style>
+</head>
+<body>
+
+<!-- 1 タイトル -->
+<section class="slide" style="justify-content:center; align-items:center; text-align:center;">
+  <img src="assets/logo.png" alt="筑波技術大学ロゴ" style="position:absolute; top:6%; left:6%; height:13%;">
+  <div class="teal" style="font-size:1em;">生成AIプログラミング体験 2026</div>
+  <h1 style="font-size:2.4em; font-weight:800; margin:.35em 0;">AIに「注文」して<br>アプリを作ろう！</h1>
+  <div class="gray" style="font-size:.85em; margin-bottom:1.2em;">体験授業（30分）</div>
+  <div style="font-weight:700; font-size:.95em;">筑波技術大学　産業技術学部　産業情報学科<br>教授　博士（情報科学）　白石 優旗</div>
+</section>
+
+<!-- 2 自己紹介 -->
+<section class="slide">
+  <h2>白石 優旗<span class="small">（しらいし ゆうき）</span></h2>
+  <img src="assets/avatar.png" alt="白石のアバター" style="position:absolute; top:5%; right:5%; height:22%; border-radius:.4em;">
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">出身</span><span>福岡県（県立鞍手高校 卒業）</span></div>
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">経歴</span><span>九州大学 博士（情報科学）→ 2013年から筑波技術大学（現在 教授）</span></div>
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">専門</span><span>人工知能（AI）／アクセシブル・テクノロジー／手話の認識・表記</span></div>
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">研究室</span><span>2年生から研究室に入れる「プレ卒研」制度あり</span></div>
+  <p class="teal" style="margin-top:.5em;">キーワード：「聴覚障害当事者（学生）」「情報保障」</p>
+  <p style="margin-top:.6em;">「筑波技術大学　白石」で検索！</p>
+</section>
+
+<!-- 3 はじめに -->
+<section class="slide">
+  <h2>はじめに</h2>
+  <div class="cols">
+    <div class="col">
+      <ul class="big">
+        <li>注文文（プロンプト）は <b>slido</b> にあります</li>
+        <li>質問も slido へ。<b>名前は書かなくてOK</b></li>
+        <li><b>保護者の方も、ご自身のスマホでご参加ください</b></li>
+        <li>アンケートは、演習のあいまでOKです</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:0 0 38%; display:flex; flex-direction:column; align-items:center; gap:.4em;">
+      <div class="qrbox" style="width:75%; aspect-ratio:1;">QRコードと<br>イベント番号は<br>当日ご案内します</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 本日の目標 -->
+<section class="slide">
+  <h2>本日の目標 <span class="small">— 大学の情報系は「楽しくて、深い」</span></h2>
+  <div class="card"><span class="num">1</span><b>楽しい：</b>AIに「注文」して、自分のアプリを作る</div>
+  <div class="card"><span class="num">2</span><b>深い：</b>AI（LLM）のしくみを、さわって理解する</div>
+  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感する ＝ AIリテラシー</div>
+  <p class="accent" style="margin-top:.6em;">去年やった人も、はじめての人も、今日は同じスタートです！</p>
+</section>
+
+<!-- 5 LLMとは（昨年スライド） -->
+<section class="slide img-slide"><img src="assets/p-05.png" alt="LLM（大規模言語モデル）の説明"></section>
+
+<!-- 6 さわって理解① -->
+<section class="slide sim-slide">
+  <h2>さわって理解①　🎲 次の言葉ガチャ</h2>
+  <div class="simwrap">
+    <iframe class="sim" src="sim-tsugi-no-kotoba.html" title="次の言葉ガチャ"></iframe>
+    <div class="simfoot">AIは「次の言葉」を確率で選んでいるだけ ／ この画面でいっしょに動かしてみよう</div>
+  </div>
+</section>
+
+<!-- 7 さわって理解② -->
+<section class="slide sim-slide">
+  <h2>さわって理解②　🗺️ ことばの地図</h2>
+  <div class="simwrap">
+    <iframe class="sim" src="sim-kotoba-no-chizu.html" title="ことばの地図"></iframe>
+    <div class="simfoot">AIの中では、言葉は「数字の座標」。意味が近い言葉は近くにいる（本物は数百次元！）</div>
+  </div>
+</section>
+
+<!-- 8 2025→2026 -->
+<section class="slide">
+  <div class="kicker">2025 → 2026</div>
+  <h2>AIはこう変わった</h2>
+  <div class="row"><span style="font-size:1.5em;">🚀</span><span><b class="teal">モデルを選べるようになった</b><br><span style="font-size:.85em;">Flash（速い）／Thinking（じっくり考える）／Pro（むずかしい問題）</span></span></div>
+  <div class="row"><span style="font-size:1.5em;">🤖</span><span><b class="teal">AIは「エージェント」へ</b><br><span style="font-size:.85em;">計画 → 実行 → 確認まで、AIが自分で進める時代に</span></span></div>
+  <div class="row"><span style="font-size:1.5em;">🏫</span><span><b class="teal">学校にもAI</b><br><span style="font-size:.85em;">学校でも生成AIが使えるようになってきています</span></span></div>
+</section>
+
+<!-- 9 今年のテーマ -->
+<section class="slide">
+  <h2>今年のテーマ</h2>
+  <p style="font-weight:800; font-size:1.1em; margin-bottom:.7em;">AIに「注文」して、自分のミニアプリを作る！</p>
+  <div style="display:flex; gap:.4em; align-items:center; margin-bottom:.8em; font-weight:700; text-align:center;">
+    <div class="card" style="flex:1; margin:0;">① 注文する</div><div>→</div>
+    <div class="card" style="flex:1; margin:0;">② 動かす</div><div>→</div>
+    <div class="card" style="flex:1; margin:0;">③ 改造する</div><div>→</div>
+    <div class="card warm" style="flex:1; margin:0;">④ 共有する</div>
+  </div>
+  <ul class="big">
+    <li><b>メニューから、作りたいものを選べます</b></li>
+    <li>同じAIでも、<b>注文しだいで できるものが変わる</b></li>
+  </ul>
+</section>
+
+<!-- 10 メニュー -->
+<section class="slide">
+  <div class="kicker">ステップ1</div>
+  <h2>メニューから選んで、AIに注文しよう</h2>
+  <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
+    <div class="card col" style="margin:0;"><b>🐹 A. もぐらたたき</b><br><span style="font-size:.8em;">定番アクション。まずはこれ！</span></div>
+    <div class="card col" style="margin:0;"><b>🥠 B. おみくじ</b><br><span style="font-size:.8em;">いちばん かんたん</span></div>
+  </div>
+  <div class="cols" style="flex:0 0 auto;">
+    <div class="card col" style="margin:0;"><b>⚡ C. 反応速度</b><br><span style="font-size:.8em;">昨年のリベンジ</span></div>
+    <div class="card warm col" style="margin:0;"><b>🚀 D. 自由×エージェント風</b><br><span style="font-size:.8em;">経験者むけ（あとで説明）</span></div>
+  </div>
+  <p class="accent" style="margin-top:.8em;">注文文の全文は <b>slido</b> に → 長押しでコピーしよう！</p>
+</section>
+
+<!-- 11 注文の例 -->
+<section class="slide">
+  <div class="kicker">ステップ1</div>
+  <h2>注文の例（A. もぐらたたき）</h2>
+  <div class="card" style="font-size:.95em; padding:.8em 1em; line-height:1.6;">
+    外部ライブラリなしの単一HTMLで、<b>もぐらたたきゲーム</b>を作ってください。絵文字のモグラが9個の穴からランダムに顔を出し、タップすると1点。<b>30秒間のスコア</b>を競えるようにしてください
+  </div>
+  <ul class="big" style="margin-top:.6em;">
+    <li class="accent">この全文が <b>slido</b> に → 長押しでコピーして、Geminiに貼ろう</li>
+    <li>B〜Dの全文も slido にあります</li>
+  </ul>
+</section>
+
+<!-- 12 経験者向け -->
+<section class="slide">
+  <div class="kicker">経験者はこれ！</div>
+  <h2>「エージェント風」の注文</h2>
+  <div class="card warm" style="padding:.7em 1em;"><b>①</b>「反応速度ゲームより面白いミニゲームの<b>仕様を、3行で提案して</b>」</div>
+  <div class="card warm" style="padding:.7em 1em;"><b>②</b>「その仕様を、<b>外部ライブラリなしの単一HTMLで実装して</b>」</div>
+  <p class="teal" style="margin-top:.6em;">AIに「計画 → 実装 → 改善」までさせるのが、2026年流！</p>
+  <p class="gray" style="font-size:.8em;">この注文文も slido にあります</p>
+</section>
+
+<!-- 13 Geminiの使い方（昨年スクショ） -->
+<section class="slide">
+  <div class="kicker">ステップ1</div>
+  <h2>AIの画面をひらこう</h2>
+  <div class="card"><b class="teal">やること</b><br>ブラウザで生成AIのページをひらき、<b>入力欄に注文文を貼りつける</b>だけ。</div>
+  <div class="card warm"><b class="accent">モデルの選択は、そのままでOK</b><br><span style="font-size:.9em;">いちばん速いモデルで十分に動きます。</span></div>
+  <p class="gray" style="font-size:.8em; margin-top:.4em;">※ 当日の画面例は、授業内で投影します</p>
+</section>
+
+<!-- 14 ステップ2 うごかそう -->
+<section class="slide">
+  <div class="kicker">ステップ2</div>
+  <h2>うごかそう</h2>
+  <div class="card" style="padding:.7em 1em;">
+    <b style="font-size:1.05em;">基本：Geminiの画面の中で、そのまま動く！</b><br>
+    <span style="font-size:.85em;">生成されると「プレビュー（Canvas）」が出る → タップして遊べる。そのまま追加注文もOK</span>
+  </div>
+  <p class="accent" style="margin-top:.5em; margin-bottom:.4em;">コードだけが出てきたら、AIにこう言ってみよう</p>
+  <div class="card warm" style="font-weight:800; font-size:1.05em; padding:.6em .9em;">この画面でそのまま遊べるようにして</div>
+  <p class="gray" style="font-size:.85em; margin-top:.45em;">それでもダメなら → もう一度おなじ注文／新しいチャットでやり直す／かんたんな B に切りかえる／先生を呼ぶ</p>
+</section>
+
+<!-- 15 ステップ3 追加注文 -->
+<section class="slide">
+  <div class="kicker">ステップ3</div>
+  <h2>AIに「追加注文」しよう</h2>
+  <p style="font-weight:700; margin-bottom:.6em;">変えたいところ（差分）だけ お願いするのがコツ！</p>
+  <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
+    <div class="card col" style="margin:0;">✨ キラキラモグラは2倍点</div>
+    <div class="card col" style="margin:0;">💣 爆弾をたたくと −5点</div>
+  </div>
+  <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
+    <div class="card col" style="margin:0;">🚀 だんだんスピードアップ</div>
+    <div class="card col" style="margin:0;">🏆 ハイスコアを保存</div>
+  </div>
+  <div class="cols" style="flex:0 0 auto;">
+    <div class="card col" style="margin:0;">🎨 見た目をかっこよく</div>
+    <div class="card col" style="margin:0;">🕹️ 自分だけのルールを追加</div>
+  </div>
+  <p class="teal" style="font-size:.92em; margin-top:.5em;">AIの方から「こうしたら？」と提案してくることも。乗ってみよう！</p>
+  <p class="gray" style="font-size:.8em; margin-top:.35em;">直らないときは、一から作り直してもらう方が早いことも…🙏</p>
+</section>
+
+<!-- 16 共有 -->
+<section class="slide">
+  <div class="kicker">【余裕があれば】</div>
+  <h2>作品を共有しよう</h2>
+  <div class="row"><span class="num">1</span><span><b>スクリーンショット</b>を撮る（電源＋音量アップを同時押し）</span></div>
+  <div class="row"><span class="num">2</span><span><b>slido に貼る</b>。作品の名前と工夫したところも書こう</span></div>
+  <div class="row"><span class="num">3</span><span>友だちの作品に <b>👍</b> しよう</span></div>
+  <p class="gray" style="margin-top:.5em; font-size:.85em;">できた人だけでOK。あとからでも大丈夫です</p>
+</section>
+
+<!-- 17 演習ボード -->
+<section class="slide">
+  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.4em;">
+    <span style="font-size:1.6em; font-weight:800;">演習タイム</span>
+    <span class="accent">目標：一人1作品！（改造はボーナス）</span>
+  </div>
+  <div class="cols">
+    <div class="col" style="flex:1.9; display:flex; flex-direction:column; gap:.45em;">
+      <div class="card" style="margin:0; font-size:.8em;">
+        <b class="teal">メニュー（全文は slido）</b><br>
+        🐹 A. もぐらたたき　🥠 B. おみくじ（かんたん）　⚡ C. 反応速度　🚀 D. 自由×エージェント風
+      </div>
+      <div class="card" style="margin:0; font-size:.8em;">
+        <b class="teal">コツ</b><br>
+        ✍️ 注文は「はっきり」「シンプルに」<br>
+        💬 わからないことは、AIに聞こう（怒られない笑）<br>
+        🌱 <b>注文のことばは、練習で上手くなる</b>
+      </div>
+      <div class="card warm" style="margin:0; font-size:.8em;">
+        <b class="accent">こまったら</b><br>
+        💡 <b>「この画面でそのまま遊べるようにして」</b>と送る<br>
+        🔁 もう一度注文／🆕 新しいチャット<br>
+        🥠 かんたんなBに切りかえる<br>
+        👥 となりの人と見せ合う／🙋 先生を呼ぶ
+      </div>
+    </div>
+    <div class="col" style="display:flex; flex-direction:column; align-items:center; gap:.4em;">
+      <div class="timer" id="timerBox">
+        <div class="tval" id="timerVal">12:00</div>
+        <div class="thint" id="timerHint">タップでスタート</div>
+      </div>
+      <div class="qrbox" style="width:56%; aspect-ratio:1;">slido<br>（当日ご案内）</div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 まとめ -->
+<section class="slide">
+  <h2>まとめ</h2>
+  <div class="card"><b>① AIは速い</b> — 数秒でアプリができる</div>
+  <div class="card"><b>② でも、ときどきウソをつく</b> — だから人間が確かめる</div>
+  <div class="card"><b>③ 注文 → 確認 → 注文し直し</b> — このくり返しで上達する</div>
+  <p class="teal" style="font-size:1.15em; margin-top:.6em;">これが「AIリテラシー」の第一歩</p>
+</section>
+
+<!-- 19 この先：AIエージェント -->
+<section class="slide">
+  <div class="kicker">この先</div>
+  <h2>AIが、自分でくり返すようになる</h2>
+  <div class="card">
+    <b>今日、みんながやったこと</b><br>
+    <span style="font-size:.9em;">注文する → 動かす → 直す。この<b>くり返しを、人が回していました</b></span>
+  </div>
+  <div class="card warm">
+    <b class="accent">いま最先端 ＝ AIエージェント</b><br>
+    <span style="font-size:.9em;">計画 → 実行 → 確認 → 修正 まで、<b>AIが自分で回す</b></span>
+  </div>
+  <p style="margin-top:.35em;">AIから「こうしたら？」と提案された人、いませんか。あれが入り口です</p>
+  <p class="teal" style="margin-top:.4em;">人の仕事は「<b>何を作りたいか</b>」を決めること</p>
+</section>
+
+<!-- 20 大学の中身は数学 -->
+<section class="slide">
+  <div class="kicker">大学の中身</div>
+  <h2 style="margin-bottom:.5em;">今日さわったものの「本物」は、数学でできています</h2>
+  <div class="mgrid">
+    <div class="mh">今日さわったもの</div>
+    <div class="mh">本物のAIでは</div>
+    <div class="mh">大学1年の必修</div>
+
+    <div class="mc">🗺️ ことばの地図<br><span class="gray">2次元の平面に並べた</span></div>
+    <div class="mc real">数百〜数千次元<br><span class="gray">人間には描けない</span></div>
+    <div class="mc sub">線形代数学1</div>
+
+    <div class="mc">🎲 次の言葉ガチャ<br><span class="gray">確率は先生が手で決めた</span></div>
+    <div class="mc real">数十億個の数字を<br><span class="gray">大量の文章から自動で調整</span></div>
+    <div class="mc sub">統計確率A</div>
+
+    <div class="mc">その「調整」のやり方</div>
+    <div class="mc real"><b>微分</b><br><span class="gray">どっちに動かせば良くなるか</span></div>
+    <div class="mc sub">解析学1</div>
+  </div>
+  <p class="accent" style="margin-top:.45em;">この3つは、1年生で <b>ぜんぶ必修</b> です</p>
+  <p class="teal" style="margin-top:.25em; font-size:.92em;">✍️ そして、AIに伝える力＝<b>国語</b>。今日みんなが何度も書き直した、あれです</p>
+</section>
+<!-- 21 情報保障工学の研究（白石研究室） -->
+<section class="slide">
+  <div class="kicker">さっきの投票、おぼえていますか</div>
+  <h2 style="margin-bottom:.45em;">「これもAI」を、<span class="accent">作る・良くする</span>研究</h2>
+  <div class="cols" style="gap:.6em; flex:0 0 auto;">
+    <div class="col" style="display:flex; flex-direction:column; gap:.4em;">
+      <div class="card" style="margin:0; font-size:.82em;"><b class="teal">🤟 手話認識</b><br>カメラで手話を読み取る</div>
+      <div class="card" style="margin:0; font-size:.82em;"><b class="teal">✍️ 手話を「書く」</b><br>手話には書き言葉がない。その表記をつくる</div>
+    </div>
+    <div class="col" style="display:flex; flex-direction:column; gap:.4em;">
+      <div class="card" style="margin:0; font-size:.82em;"><b class="teal">👥 多者会話支援</b><br>何人も同時に話す場で、話についていけるように</div>
+      <div class="card" style="margin:0; font-size:.82em;"><b class="teal">🎧 音声認識の応用</b><br>文字起こしを、もっと使えるものに</div>
+    </div>
+  </div>
+  <p class="gray" style="font-size:.78em; margin-top:.4em;">ほかに XRアクセシビリティ／スポーツ支援／ロボット活用 など</p>
+  <p style="font-weight:800; font-size:1.02em; margin-top:.35em;">情報保障を<span class="gray">受けるだけ</span>ではなく、<span class="accent">提供する側</span>になろう！</p>
+  <p class="teal" style="font-size:.8em; margin-top:.35em;">★ 白石の授業：機械学習・演習／LLMと生成AI／情報保障技術学・演習／情報保障システム工学・演習／特別研究<br><b>情報科学コース・情報保障工学領域、どちらからでも白石研究室に入れます</b></p>
+</section>
+<!-- 22 研究の一例：HaptStarter と、その先輩のキャリア -->
+<section class="slide">
+  <div class="kicker">研究って、どこまで行けるの？</div>
+  <h2 style="margin-bottom:.45em;">スタートの音が聞こえないなら、<span class="accent">振動で</span></h2>
+  <div class="cols" style="gap:.7em; flex:0 0 auto;">
+    <div class="col" style="flex:1.35; display:flex; flex-direction:column; gap:.45em;">
+      <div class="card" style="margin:0; padding:.5em .8em; font-size:.92em;">
+        <b>陸上の短距離走</b>。合図は「ピストルの音」。聞こえない選手には <b>光（LED）</b>
+      </div>
+      <div class="card warm" style="margin:0; padding:.5em .8em; font-size:.92em;">
+        <b class="accent">研究でわかったこと</b><br>振動（触覚）は、<b>光より速く反応できて、音と同じくらい速い</b>
+      </div>
+      <div class="card" style="margin:0; padding:.5em .8em; font-size:.92em;">
+        <b class="teal">→ 振動で知らせる装置「HaptStarter」を開発</b><br>
+        <span class="gray" style="font-size:.9em;">2024年 国際学術誌に掲載</span>
+      </div>
+    </div>
+    <div class="col" style="flex:1.05; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.25em;">
+      <div class="zoomshot" id="haptShot" style="--ar:3/2; --fx:68%; --fy:86%; --zs:2.8;" title="タップで装置をアップ">
+        <img src="assets/hapt-scene.jpg" alt="スターティングブロックに構えた選手の足元。左に光（LED）の合図装置、右手の指先に振動装置がついている">
+        <span class="zring"></span>
+      </div>
+      <!-- 拡大の前後で高さが変わらないよう、2行ぶんの箱を固定しておく -->
+      <div class="gray" id="haptCap" style="font-size:.62em; text-align:center; line-height:1.4; min-height:2.9em;">左＝光（LED）の合図　右＝指先の振動装置<br><b>タップで拡大</b></div>
+    </div>
+  </div>
+  <div class="card warm" style="padding:.6em .9em; margin-bottom:0;">
+    <b class="accent">この研究をしていた先輩は…</b><br>
+    <span style="font-size:.95em;">筑波技術大学で <b>修士</b> → 筑波大学（落合陽一 研究室）で <b>博士</b> → いま <b>研究者</b></span>
+  </div>
+</section>
+
+<!-- 23 さいごに -->
+<section class="slide">
+  <h2>さいごに</h2>
+  <img src="assets/avatar.png" alt="白石のアバター" style="position:absolute; top:5%; right:5%; height:22%; border-radius:.4em;">
+  <p style="margin-bottom:.5em;">AIは、あなたの「作りたい」をかなえる道具。</p>
+  <p class="accent" style="margin-bottom:.5em;">みなさんは、はじめからAIがある世代。<br><b>新しい使い方は、みなさんが見つけてください</b></p>
+  <p class="teal" style="font-size:1.1em; margin-bottom:.6em;">AIを駆使して、皆さんが主役となる<br>アクセシブルな未来を、共に創りませんか？</p>
+  <p style="font-size:1.25em; font-weight:800; margin-bottom:.8em;">「つづき」は筑波技術大学にて！！</p>
+  <div style="display:flex; align-items:center; gap:1em;">
+    <img src="assets/qr_lab.png" alt="研究室サイトQR" style="height:4.5em;">
+    <div>https://www.shiraishi-lab.org/<br><b>「筑波技術大学　白石」で検索！</b><br><span class="gray" style="font-size:.72em;">今日の教材は <b>おうちのネットから</b> 遊べます<br>yuhkis.github.io/taiken2026</span></div>
+  </div>
+</section>
+
+<!-- 24 予備 Copilot -->
+<section class="slide">
+  <div class="kicker">予備（Geminiが使えない場合のみ）</div>
+  <h2>Copilot で行う場合</h2>
+  <p style="font-weight:700; margin-bottom:.6em;">流れは同じ！　slidoから注文文をコピー → 貼りつけ</p>
+  <div class="row"><span class="num">1</span><span>Copilot を開いてログイン</span></div>
+  <div class="row"><span class="num">2</span><span>slido から注文文をコピーして貼り付け</span></div>
+  <div class="row"><span class="num">3</span><span>生成されたHTMLコードをコピー</span></div>
+  <div class="row"><span class="num">4</span><span>プレビューが出たら、そのまま遊べる（出なければ先生を呼ぼう）</span></div>
+</section>
+
+<!-- 25 予備 こまったら -->
+<section class="slide">
+  <div class="kicker">こまったら</div>
+  <h2>うまくいかないときは</h2>
+  <div class="row"><span>🔁</span><span><b>もう一度お願いする</b>（結果は毎回変わる）</span></div>
+  <div class="row"><span>🆕</span><span><b>新しいチャットでやり直す</b></span></div>
+  <div class="row"><span>📋</span><span><b>コピーはコード右上の📋アイコンで</b></span></div>
+  <div class="row"><span>🥠</span><span><b>かんたんな B（おみくじ）に切りかえる</b></span></div>
+  <div class="row"><span>👥</span><span><b>となりの人と見せ合う</b></span></div>
+  <div class="row"><span>🙋</span><span><b>先生を呼ぼう</b>（slidoに書いてもOK）</span></div>
+</section>
+
+<script>
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var cur = 0;
+  slides.forEach(function (s, i) {
+    var f = document.createElement("footer");
+    f.className = "pagenum"; f.textContent = (i + 1);
+    s.appendChild(f);
+  });
+  var counter = document.createElement("div");
+  counter.id = "counter"; document.body.appendChild(counter);
+  var nav = document.createElement("div");
+  nav.id = "nav";
+  nav.innerHTML = '<button id="prev" aria-label="前へ">‹</button><button id="next" aria-label="次へ">›</button>';
+  document.body.appendChild(nav);
+
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function (s, j) { s.classList.toggle("active", j === cur); });
+    counter.textContent = (cur + 1) + " / " + slides.length;
+    location.hash = cur + 1;
+  }
+  document.getElementById("next").addEventListener("click", function () { show(cur + 1); });
+  document.getElementById("prev").addEventListener("click", function () { show(cur - 1); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") show(cur + 1);
+    if (e.key === "ArrowLeft" || e.key === "PageUp") show(cur - 1);
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+  });
+  var startX = null;
+  document.addEventListener("touchstart", function (e) { if (e.target.closest("iframe")) return; startX = e.touches[0].clientX; });
+  document.addEventListener("touchend", function (e) {
+    if (startX === null) return;
+    var dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1));
+    startX = null;
+  });
+  /* 演習タイマー（17枚目）。タップで開始／一時停止、ダブルタップでリセット。
+     このスライドは演習中ずっと出しっぱなしになるので、画面内に置く。 */
+  (function () {
+    var TOTAL = 12 * 60;
+    var box = document.getElementById("timerBox");
+    if (!box) return;
+    var val = document.getElementById("timerVal");
+    var hint = document.getElementById("timerHint");
+    var left = TOTAL, running = false, endAt = 0, tick = null;
+
+    function fmt(s) {
+      s = Math.max(0, Math.round(s));
+      var m = Math.floor(s / 60);
+      return m + ":" + ("0" + (s - m * 60)).slice(-2);
+    }
+    function paint() {
+      val.textContent = fmt(left);
+      box.classList.toggle("warn", left <= 60 && left > 0);
+      box.classList.toggle("over", left <= 0);
+      if (left <= 0) hint.textContent = "終了！ ダブルタップでリセット";
+      else hint.textContent = running ? "タップで一時停止" : "タップでスタート";
+    }
+    function frame() {
+      left = (endAt - Date.now()) / 1000;
+      if (left <= 0) { left = 0; stop(); }
+      paint();
+    }
+    function start() {
+      endAt = Date.now() + left * 1000;
+      running = true;
+      tick = setInterval(frame, 250);
+      paint();
+    }
+    function stop() {
+      running = false;
+      if (tick) { clearInterval(tick); tick = null; }
+      paint();
+    }
+    box.addEventListener("click", function () { running ? stop() : start(); });
+    box.addEventListener("dblclick", function () { stop(); left = TOTAL; paint(); });
+    paint();
+  })();
+
+  /* 22枚目の写真。まず全体（構えた選手・光の合図・指先の装置）を見せ、
+     タップで指先の装置へズームインする。もう一度タップで全体に戻る。 */
+  (function () {
+    var shot = document.getElementById("haptShot");
+    if (!shot) return;
+    var cap = document.getElementById("haptCap");
+    var WIDE = "左＝光（LED）の合図　右＝指先の振動装置<br><b>タップで拡大</b>";
+    var ZOOM = "指先の白い箱が <b>HaptStarter</b>。中の振動モータが「スタート！」を伝える";
+    shot.addEventListener("click", function () {
+      shot.classList.toggle("z");
+      cap.innerHTML = shot.classList.contains("z") ? ZOOM : WIDE;
+    });
+  })();
+
+  /* 自動フィット: 各スライドの文字を「はみ出さない範囲でできるだけ大きく」保つ。
+     基準サイズを遠い席向けに大きめに取り、内容が多いスライドだけ自動で少し縮める。 */
+  function overflows(s) {
+    if (s.scrollHeight > s.clientHeight + 2) return true;
+    /* 実際に内容を切り落としうるのは、高さが決まっている flex コンテナだけ。
+       カードや行は content に合わせて伸びるので、丸め誤差で誤検知しないよう外す。 */
+    var kids = s.querySelectorAll(".cols, .col, .simwrap");
+    for (var i = 0; i < kids.length; i++) {
+      if (kids[i].scrollHeight > kids[i].clientHeight + 2) return true;
+    }
+    return false;
+  }
+  /* 本文の流し込み要素だけを対象にする（画像・ページ番号などの absolute は除く） */
+  function flowKids(s) {
+    return Array.prototype.filter.call(s.children, function (c) {
+      var st = getComputedStyle(c);
+      return st.position === "static" && st.display !== "none";
+    });
+  }
+  /* 余った縦の余白を、行間ではなく「項目と項目のあいだ」に配ってスライドを埋める。
+     見出しは上に固定されたままなので、ページを送っても位置が跳ねない。 */
+  function spread(s) {
+    var kids = flowKids(s);
+    kids.forEach(function (c) {
+      if (c.dataset.mb === undefined) c.dataset.mb = c.style.marginBottom || "";
+      c.style.marginBottom = c.dataset.mb;
+    });
+    if (s.classList.contains("img-slide")) return;
+    if (getComputedStyle(s).justifyContent === "center") return;
+    if (kids.length < 2) return;
+    var grows = kids.some(function (c) { return parseFloat(getComputedStyle(c).flexGrow) > 0; });
+    if (grows) return;
+    var cs = getComputedStyle(s);
+    var avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var used = 0;
+    kids.forEach(function (c) {
+      var k = getComputedStyle(c);
+      used += c.getBoundingClientRect().height + parseFloat(k.marginTop) + parseFloat(k.marginBottom);
+    });
+    var gaps = kids.length - 1;
+    var leftover = avail - used;
+    if (leftover <= 0) return;
+    var fs = parseFloat(cs.fontSize);
+    var extra = Math.min(leftover * 0.82 / gaps, fs * 1.15);
+    if (extra < 2) return;
+    kids.forEach(function (c, i) {
+      if (i === gaps) return;
+      c.style.marginBottom = ((parseFloat(getComputedStyle(c).marginBottom) || 0) + extra) + "px";
+    });
+  }
+  function fitSlide(s) {
+    if (s.classList.contains("img-slide")) return;
+    s.style.fontSize = "";
+    var base = parseFloat(getComputedStyle(s).fontSize);
+    var k = 1;
+    while (k > 0.7 && overflows(s)) {
+      k -= 0.025;
+      s.style.fontSize = (base * k).toFixed(2) + "px";
+    }
+  }
+  function fitAll() {
+    slides.forEach(function (s) {
+      var wasActive = s.classList.contains("active");
+      if (!wasActive) { s.style.visibility = "hidden"; s.classList.add("active"); }
+      flowKids(s).forEach(function (c) {
+        if (c.dataset.mb === undefined) c.dataset.mb = c.style.marginBottom || "";
+        c.style.marginBottom = c.dataset.mb;
+      });
+      fitSlide(s);
+      spread(s);
+      if (!wasActive) { s.classList.remove("active"); s.style.visibility = ""; }
+    });
+  }
+  var fitTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(fitTimer); fitTimer = setTimeout(fitAll, 150);
+  });
+
+  show(parseInt(location.hash.slice(1), 10) - 1 || 0);
+  fitAll();
+  window.addEventListener("load", fitAll);
+</script>
+</body>
+</html>

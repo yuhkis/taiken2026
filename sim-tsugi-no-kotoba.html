@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>次の言葉ガチャ — AIのしくみを体感（筑波技術大学 白石研究室）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f4f7f7; color: #1f2933; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 12px;
+  }
+  h1 { font-size: clamp(20px, 4vw, 30px); color: #0b6b6b; margin: 6px 0 2px; }
+  .lead { font-size: clamp(14px, 2.6vw, 19px); color: #6b7280; margin-bottom: 10px; text-align: center; }
+  #sentenceBox {
+    width: 100%; max-width: 760px; background: #fff; border: 3px solid #0e8c8c;
+    border-radius: 14px; padding: 16px 18px; font-size: clamp(24px, 5vw, 40px);
+    font-weight: 700; min-height: 2.2em; line-height: 1.5; margin-bottom: 10px;
+  }
+  #sentenceBox .cursor { color: #f2a93b; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .caption { font-size: clamp(15px, 2.8vw, 20px); font-weight: 700; color: #0b6b6b; margin: 6px 0; }
+  #choices { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    position: relative; border: 0; border-radius: 12px; background: #e6f4f3;
+    overflow: hidden; cursor: pointer; text-align: left; padding: 0; height: 56px;
+  }
+  .choice .bar { position: absolute; left: 0; top: 0; bottom: 0; background: #9fd6d4; transition: width .5s; }
+  .choice .label {
+    position: relative; display: flex; justify-content: space-between; align-items: center;
+    height: 100%; padding: 0 16px; font-size: clamp(18px, 3.6vw, 26px); font-weight: 700;
+    font-family: inherit; color: #1f2933;
+  }
+  .controls { display: flex; gap: 10px; margin: 14px 0 6px; flex-wrap: wrap; justify-content: center; }
+  button.big {
+    font-family: inherit; font-size: clamp(17px, 3.2vw, 22px); font-weight: 700;
+    border: 0; border-radius: 12px; padding: 14px 22px; cursor: pointer;
+  }
+  #gachaBtn { background: #f2a93b; color: #1f2933; }
+  #resetBtn { background: #0b6b6b; color: #fff; }
+  .temp { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 12px; padding: 8px 12px; }
+  .temp span { font-size: 15px; font-weight: 700; color: #6b7280; }
+  .temp button {
+    font-family: inherit; font-size: 15px; font-weight: 700; border: 2px solid #0e8c8c;
+    background: #fff; color: #0b6b6b; border-radius: 9px; padding: 7px 10px; cursor: pointer;
+  }
+  .temp button.on { background: #0e8c8c; color: #fff; }
+  #doneMsg { font-size: clamp(16px, 3vw, 22px); font-weight: 700; color: #b97a14; margin-top: 8px; text-align: center; }
+  footer { margin-top: auto; padding-top: 12px; font-size: 12px; color: #6b7280; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>🎲 次の言葉ガチャ</h1>
+  <p class="lead">AIは「次に来る言葉」を<b>確率</b>で選んでいるだけ！ 言葉をタップして文を作ろう</p>
+  <div id="sentenceBox"></div>
+  <p class="caption">次に来る言葉は？（％は AIが考えた確率）</p>
+  <div id="choices"></div>
+  <div class="controls">
+    <button class="big" id="gachaBtn">🎲 AIにまかせる</button>
+    <div class="temp">
+      <span>選び方：</span>
+      <button data-t="low">まじめ</button>
+      <button data-t="mid" class="on">ふつう</button>
+      <button data-t="high">ガチャ</button>
+    </div>
+    <button class="big" id="resetBtn">🔄 はじめから</button>
+  </div>
+  <div id="doneMsg"></div>
+  <footer>筑波技術大学 産業技術学部 産業情報学科 白石研究室「生成AIプログラミング体験 2026」</footer>
+<script>
+  // 遷移表: 状態 → 候補[語, 確率%]（教材用に手作りした「ミニ言語モデル」）
+  var START = ["昨夜は", "夏休みは", "AIは", "給食の時間に"];
+  var MODEL = {
+    "昨夜は": [["寒かった", 45], ["涼しかった", 25], ["暖かかった", 15], ["静かだった", 10], ["にぎやかだった", 5]],
+    "昨夜は寒かった": [["ので、", 50], ["けれど、", 30], ["。", 20]],
+    "昨夜は涼しかった": [["ので、", 55], ["けれど、", 25], ["。", 20]],
+    "昨夜は暖かかった": [["ので、", 50], ["けれど、", 30], ["。", 20]],
+    "昨夜は静かだった": [["ので、", 45], ["けれど、", 30], ["。", 25]],
+    "昨夜はにぎやかだった": [["ので、", 45], ["けれど、", 30], ["。", 25]],
+    "@ので、": [["ぐっすり眠れた。", 40], ["散歩に出かけた。", 30], ["窓を開けた。", 20], ["アイスを食べた。", 10]],
+    "@けれど、": [["すぐに眠れた。", 40], ["宿題を続けた。", 30], ["ゲームをした。", 20], ["星を見に行った。", 10]],
+    "夏休みは": [["海に行きたい", 35], ["ゲームをしたい", 25], ["宿題が多い", 20], ["部活がある", 15], ["昼まで寝たい", 5]],
+    "夏休みは海に行きたい": [["。", 60], ["と思う。", 40]],
+    "夏休みはゲームをしたい": [["。", 60], ["と思う。", 40]],
+    "夏休みは宿題が多い": [["。", 55], ["と思う。", 45]],
+    "夏休みは部活がある": [["。", 60], ["と思う。", 40]],
+    "夏休みは昼まで寝たい": [["。", 60], ["と思う。", 40]],
+    "AIは": [["言葉を予測する", 40], ["計算が得意だ", 25], ["ときどき間違える", 20], ["道具だ", 15]],
+    "AIは言葉を予測する": [["しくみだ。", 55], ["機械だ。", 45]],
+    "AIは計算が得意だ": [["。", 60], ["と言われる。", 40]],
+    "AIはときどき間違える": [["ので確認が大切だ。", 70], ["。", 30]],
+    "AIは道具だ": [["。使う人しだいだ。", 60], ["。", 40]],
+    "給食の時間に": [["カレーが出た", 45], ["パンが出た", 25], ["先生が笑った", 20], ["停電した", 10]],
+    "給食の時間にカレーが出た": [["。おかわりした。", 55], ["。", 45]],
+    "給食の時間にパンが出た": [["。", 60], ["。ジャムもあった。", 40]],
+    "給食の時間に先生が笑った": [["。", 100]],
+    "給食の時間に停電した": [["。びっくりした。", 100]]
+  };
+  var TEMP = { low: 0.35, mid: 1.0, high: 2.2 };
+  var temp = "mid";
+  var sentence = "";
+  var startIdx = -1;
+
+  var sBox = document.getElementById("sentenceBox");
+  var choicesEl = document.getElementById("choices");
+  var doneMsg = document.getElementById("doneMsg");
+
+  function candidates() {
+    if (!sentence) return START.map(function (w) { return [w, Math.round(100 / START.length)]; });
+    if (MODEL[sentence]) return MODEL[sentence];
+    var m = sentence.match(/(ので、|けれど、)$/);
+    if (m && MODEL["@" + m[1]]) return MODEL["@" + m[1]];
+    return null;
+  }
+
+  function adjusted(cands) {
+    var t = TEMP[temp];
+    var ws = cands.map(function (c) { return Math.pow(c[1] / 100, 1 / t); });
+    var sum = ws.reduce(function (a, b) { return a + b; }, 0);
+    return cands.map(function (c, i) { return [c[0], ws[i] / sum]; });
+  }
+
+  function render() {
+    sBox.innerHTML = (sentence || "（下から選んでスタート）") + '<span class="cursor">▊</span>';
+    choicesEl.innerHTML = "";
+    doneMsg.textContent = "";
+    var cands = candidates();
+    if (!cands) {
+      doneMsg.textContent = "文が完成！🎉 同じ始まりでも、もう一度やると違う文になるかも（＝ガチャ）。「はじめから」でもう一回！";
+      return;
+    }
+    cands.forEach(function (c) {
+      var btn = document.createElement("button");
+      btn.className = "choice";
+      btn.innerHTML = '<div class="bar" style="width:0%"></div><div class="label"><span>' + c[0] + '</span><span>' + c[1] + '%</span></div>';
+      btn.addEventListener("click", function () { pick(c[0]); });
+      choicesEl.appendChild(btn);
+      requestAnimationFrame(function () { btn.querySelector(".bar").style.width = c[1] + "%"; });
+    });
+  }
+
+  function pick(word) { sentence = sentence ? sentence + word : word; render(); }
+
+  function gacha() {
+    var cands = candidates();
+    if (!cands) return;
+    var adj = adjusted(cands);
+    var r = Math.random(), acc = 0, chosen = adj[adj.length - 1][0];
+    for (var i = 0; i < adj.length; i++) { acc += adj[i][1]; if (r <= acc) { chosen = adj[i][0]; break; } }
+    var btns = choicesEl.querySelectorAll(".choice");
+    btns.forEach(function (b) { if (b.textContent.indexOf(chosen) === 0) b.style.background = "#f2a93b"; });
+    setTimeout(function () { pick(chosen); }, 350);
+  }
+
+  document.getElementById("gachaBtn").addEventListener("click", gacha);
+  document.getElementById("resetBtn").addEventListener("click", function () { sentence = ""; render(); });
+  document.querySelectorAll(".temp button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      temp = b.dataset.t;
+      document.querySelectorAll(".temp button").forEach(function (x) { x.classList.toggle("on", x === b); });
+    });
+  });
+  render();
+</script>
+</body>
+</html>
