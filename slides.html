@@ -115,6 +115,20 @@
     background: rgba(14,140,140,.85); color: #fff; cursor: pointer; font-weight: 700;
   }
   #counter { position: fixed; left: 12px; bottom: 12px; color: #9ab; font-size: 14px; z-index: 50; }
+  /* 進行用ストップウォッチ（発表者の目安）。
+     4:3スライドの外の黒帯に置く。ページ番号と同じ控えめな色で、客席からは目に入らない。
+     T キーで隠せる。クリックで開始/一時停止、ダブルクリックでリセット。 */
+  #stopwatch {
+    position: fixed; left: 12px; bottom: 32px; z-index: 50;
+    color: #9ab; font-size: 14px; font-weight: 700; cursor: pointer;
+    font-variant-numeric: tabular-nums; letter-spacing: .02em;
+    -webkit-user-select: none; user-select: none; white-space: nowrap;
+  }
+  #stopwatch .sw-diff { font-weight: 400; opacity: .85; }
+  #stopwatch.idle { opacity: .5; }
+  #stopwatch.late .sw-diff { color: var(--amber); opacity: 1; }
+  #stopwatch.early .sw-diff { color: #6ec6c6; opacity: 1; }
+  #stopwatch.hidden { display: none; }
   iframe.sim { width: 100%; height: 100%; border: 2px solid var(--tint); border-radius: .5em; background: #f4f7f7; }
   .simwrap { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .25em; }
   .simfoot { font-size: .62em; color: var(--gray); }
@@ -538,11 +552,61 @@
   nav.innerHTML = '<button id="prev" aria-label="前へ">‹</button><button id="next" aria-label="次へ">›</button>';
   document.body.appendChild(nav);
 
+  /* --- 進行ストップウォッチ ---------------------------------------------
+     開始時刻が読めないので、時計ではなく「授業が始まってからの経過」で進行を見る。
+     経過時間と、32分プランに対する進み/遅れを出す。
+     クリック=開始/一時停止、ダブルクリック=リセット、T キー=表示の切替。 */
+  var swBox = document.createElement("div");
+  swBox.id = "stopwatch";
+  swBox.className = "idle";
+  swBox.title = "クリック: 開始/一時停止　ダブルクリック: リセット　T: 表示切替";
+  document.body.appendChild(swBox);
+
+  /* 各スライドに入っているはずの経過秒（32分プラン）。24・25は予備なので目安を置かない */
+  var SW_PLAN = [
+    0, 45, 90, 210, 270, 330, 420, 510, 600, 640, 675, 715, 750, 795, 840, 870,
+    900,                       /* 17 演習ここから11分 */
+    1560, 1620, 1680, 1770, 1830, 1920, null, null
+  ];
+  var swRunning = false, swBase = 0, swAcc = 0;
+
+  function swElapsed() { return swAcc + (swRunning ? (Date.now() - swBase) / 1000 : 0); }
+  function swFmt(s) {
+    s = Math.max(0, Math.floor(s));
+    var m = Math.floor(s / 60);
+    return m + ":" + ("0" + (s - m * 60)).slice(-2);
+  }
+  function swPaint() {
+    var e = swElapsed(), plan = SW_PLAN[cur];
+    swBox.classList.remove("late", "early");
+    var html = "⏱ " + swFmt(e);
+    if (plan != null && (swRunning || swAcc > 0)) {
+      var d = e - plan;
+      html += ' <span class="sw-diff">' + (d >= 0 ? "+" : "−") + swFmt(Math.abs(d)) + "</span>";
+      if (d > 60) swBox.classList.add("late");
+      else if (d < -60) swBox.classList.add("early");
+    }
+    swBox.innerHTML = html;
+    swBox.classList.toggle("idle", !swRunning && swAcc === 0);
+  }
+  function swStart() { if (!swRunning) { swRunning = true; swBase = Date.now(); } }
+  function swStop() { if (swRunning) { swAcc = swElapsed(); swRunning = false; } }
+
+  swBox.addEventListener("click", function () { swRunning ? swStop() : swStart(); swPaint(); });
+  swBox.addEventListener("dblclick", function () { swStop(); swAcc = 0; swPaint(); });
+  setInterval(swPaint, 500);
+
+  var booted = false;
   function show(i) {
+    var prev = cur;
     cur = Math.max(0, Math.min(slides.length - 1, i));
     slides.forEach(function (s, j) { s.classList.toggle("active", j === cur); });
     counter.textContent = (cur + 1) + " / " + slides.length;
     location.hash = cur + 1;
+    /* 1枚目から進んだら自動で計り始める（押し忘れ防止）。
+       読み込み直後は数えない（#22 などで直接開いて確認するときに動き出さないように） */
+    if (booted && prev === 0 && cur > 0) swStart();
+    swPaint();
   }
   document.getElementById("next").addEventListener("click", function () { show(cur + 1); });
   document.getElementById("prev").addEventListener("click", function () { show(cur - 1); });
@@ -551,6 +615,9 @@
     if (e.key === "ArrowLeft" || e.key === "PageUp") show(cur - 1);
     if (e.key === "Home") show(0);
     if (e.key === "End") show(slides.length - 1);
+    /* T: ストップウォッチを隠す／出す　S: 開始/一時停止 */
+    if (e.key === "t" || e.key === "T") swBox.classList.toggle("hidden");
+    if (e.key === "s" || e.key === "S") { swRunning ? swStop() : swStart(); swPaint(); }
   });
   var startX = null;
   document.addEventListener("touchstart", function (e) { if (e.target.closest("iframe")) return; startX = e.touches[0].clientX; });
@@ -696,6 +763,7 @@
   });
 
   show(parseInt(location.hash.slice(1), 10) - 1 || 0);
+  booted = true;
   fitAll();
   window.addEventListener("load", fitAll);
 </script>
