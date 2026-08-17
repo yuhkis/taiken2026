@@ -171,6 +171,28 @@
     70% { box-shadow: 0 0 0 .9em rgba(242, 169, 59, 0); }
     100% { box-shadow: 0 0 0 0 rgba(242, 169, 59, 0); }
   }
+  /* 数式（大学版）。外部ライブラリなし・serif手組み。file:// で完全動作 */
+  .fm { font-family: "STIX Two Math", "Times New Roman", serif; white-space: nowrap; }
+  .fm i { font-style: italic; }
+  .fm sub, .fm sup { font-size: .6em; }
+  .frac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; line-height: 1.2; }
+  .frac .nu { border-bottom: .05em solid currentColor; padding: 0 .2em; }
+  .frac .de { padding: 0 .2em; }
+  .bigop { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; margin: 0 .1em; }
+  .bigop .op { font-size: 1.5em; line-height: 1; }
+  .bigop .lo, .bigop .hi { font-size: .5em; line-height: 1.25; }
+  .fmcard { background: var(--tint); border-radius: .55em; padding: .55em .9em .5em; text-align: center; }
+  .fmcard .fm { font-size: 1.2em; }
+  .fmread { font-size: .74em; margin-top: .3em; font-weight: 700; }
+  /* 教材スライド用の数式バー（教材の下、キャプション位置） */
+  .fmbar {
+    display: flex; align-items: center; gap: .9em; flex-wrap: wrap;
+    background: var(--tint); border-radius: .45em; padding: .3em .7em;
+    font-size: .62em;
+  }
+  .fmbar .fm { font-size: 1.15em; }
+  .fmbar .note { font-weight: 700; }
+  .figcap { font-size: .56em; color: var(--gray); text-align: center; margin-top: .25em; }
   .banner {
     position: absolute; left: 3%; bottom: 3%; width: 45%;
     background: var(--amber-tint); border-radius: .5em; padding: .5em .7em;
@@ -223,42 +245,165 @@
 <section class="slide">
   <h2>本日の目標 <span class="small">— 大学の情報系は「楽しくて、深い」</span></h2>
   <div class="card"><span class="num">1</span><b>楽しい：</b>AIに「注文」して、自分のアプリを作る</div>
-  <div class="card"><span class="num">2</span><b>深い：</b>AI（LLM）のしくみを、さわって理解する</div>
-  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感する ＝ AIリテラシー</div>
+  <div class="card"><span class="num">2</span><b>深い：</b>LLMのしくみを、さわって・<b>数式で</b>理解する</div>
+  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感し、<b>原理の式を持ち帰る</b> ＝ AIリテラシー</div>
   <p class="accent" style="margin-top:.6em;">去年やった人も、はじめての人も、今日は同じスタートです！</p>
 </section>
 
-<!-- 5 LLMとは（昨年スライド） -->
-<section class="slide img-slide"><img src="assets/p-05.png" alt="LLM（大規模言語モデル）の説明"></section>
+<!-- 5 LLMの定義（式1: 自己回帰） -->
+<section class="slide">
+  <div class="kicker">AIの正体</div>
+  <h2>大規模言語モデル（LLM）<span class="small">＝「次のトークン」の確率を計算する関数</span></h2>
+  <div class="fmcard">
+    <span class="fm"><i>P</i>(<i>w</i><sub>1</sub>, <i>w</i><sub>2</sub>, …, <i>w</i><sub><i>T</i></sub>) = <span class="bigop"><span class="hi"><i>T</i></span><span class="op">∏</span><span class="lo"><i>t</i>=1</span></span> <i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>1</sub>, …, <i>w</i><sub><i>t</i>−1</sub>)</span>
+    <div class="fmread">読み下し：文章ぜんたいの確率は、「次の言葉（トークン）の確率」の<b>掛け算</b>でできている</div>
+  </div>
+  <div class="card" style="font-size:.84em; margin-top:.5em;"><b class="teal">用語：自己回帰（autoregressive）</b>　前までの言葉を条件に、次の1語の確率を出す。これをくり返して文章を作る</div>
+  <p style="margin-top:.4em;">大量の文章から、この確率を学習した。<b class="accent">確率で動く ＝ ガチャ</b>。次のページで、指でさわって確かめます</p>
+</section>
 
-<!-- 6 さわって理解① -->
+<!-- 6 さわって理解① 次トークン予測 -->
 <section class="slide sim-slide">
-  <h2>さわって理解①　🎲 次の言葉ガチャ</h2>
+  <h2>さわって理解①　次トークン予測<span class="small">（next-token prediction）</span></h2>
   <div class="simwrap">
     <iframe class="sim" src="sim-tsugi-no-kotoba.html" title="次の言葉ガチャ"></iframe>
-    <div class="simfoot">AIは「次の言葉」を確率で選んでいるだけ ／ この画面でいっしょに動かしてみよう</div>
+    <div class="fmbar">
+      <span class="fm"><i>P</i>(<i>w</i><sub><i>i</i></sub>) = <span class="frac"><span class="nu">exp(<i>z</i><sub><i>i</i></sub> / <i>T</i>)</span><span class="de">Σ<sub><i>j</i></sub> exp(<i>z</i><sub><i>j</i></sub> / <i>T</i>)</span></span></span>
+      <span class="note"><b>ソフトマックス関数</b>。<i>T</i> ＝ <b>温度</b> —「まじめ／ふつう／ガチャ」が <i>T</i> の切り替え</span>
+    </div>
   </div>
 </section>
 
-<!-- 7 さわって理解② -->
+<!-- 7 さわって理解② 単語埋め込み -->
 <section class="slide sim-slide">
-  <h2>さわって理解②　🗺️ ことばの地図</h2>
+  <h2>さわって理解②　単語埋め込み<span class="small">（word embedding）</span></h2>
   <div class="simwrap">
     <iframe class="sim" src="sim-kotoba-no-chizu.html" title="ことばの地図"></iframe>
-    <div class="simfoot">AIの中では、言葉は「数字の座標」。意味が近い言葉は近くにいる（本物は数百次元！）</div>
+    <div class="fmbar">
+      <span class="fm">cos(<b><i>u</i></b>, <b><i>v</i></b>) = <span class="frac"><span class="nu"><b><i>u</i></b> · <b><i>v</i></b></span><span class="de">‖<b><i>u</i></b>‖ ‖<b><i>v</i></b>‖</span></span></span>
+      <span class="fm"><b><i>v</i></b><sub>王様</sub> − <b><i>v</i></b><sub>男性</sub> + <b><i>v</i></b><sub>女性</sub> ≈ <b><i>v</i></b><sub>女王</sub></span>
+      <span class="note">言葉は ℝ<sup><i>d</i></sup> のベクトル。近さ＝<b>余弦類似度</b>。「魔法の計算」＝右の式（Mikolov et al., 2013）</span>
+    </div>
   </div>
 </section>
 
-<!-- 8 2025→2026 -->
+<!-- 8 なぜ今動くのか：3つの柱 -->
 <section class="slide">
-  <div class="kicker">2025 → 2026</div>
-  <h2>AIはこう変わった</h2>
-  <div class="row"><span style="font-size:1.5em;">🚀</span><span><b class="teal">モデルを選べるようになった</b><br><span style="font-size:.85em;">Flash（速い）／Thinking（じっくり考える）／Pro（むずかしい問題）</span></span></div>
-  <div class="row"><span style="font-size:1.5em;">🤖</span><span><b class="teal">AIは「エージェント」へ</b><br><span style="font-size:.85em;">計画 → 実行 → 確認まで、AIが自分で進める時代に</span></span></div>
-  <div class="row"><span style="font-size:1.5em;">🏫</span><span><b class="teal">学校にもAI</b><br><span style="font-size:.85em;">学校でも生成AIが使えるようになってきています</span></span></div>
+  <div class="kicker">なぜ今、ここまで動くのか</div>
+  <h2>LLMを成立させた「3つの柱」</h2>
+  <div class="cols" style="flex:0 0 auto; gap:.6em;">
+    <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">📚</div><b class="teal">ビッグデータ</b><br><span style="font-size:.76em;">兆単位のトークン<br>（Web全体の文章）</span></div>
+    <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">⚡</div><b class="teal">計算力</b><br><span style="font-size:.76em;">GPUによる<br>桁違いの演算量</span></div>
+    <div class="card warm col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">🧮</div><b class="accent">アルゴリズム</b><br><span style="font-size:.76em;">Transformer<br>＋ 勾配降下法</span></div>
+  </div>
+  <p style="margin-top:.7em;">3つが <b>2020年代に揃った</b>。次の2枚で、「データ×計算力」と「アルゴリズム」を数字と式で見ます</p>
+  <p class="gray" style="font-size:.7em; margin-top:.3em;">Transformer: Vaswani et al. (2017) <i>Attention Is All You Need</i>. NeurIPS 2017</p>
 </section>
 
-<!-- 9 今年のテーマ -->
+<!-- 9 スケーリング則 -->
+<section class="slide">
+  <div class="kicker">柱1・2　ビッグデータ × 計算力</div>
+  <h2>スケーリング則<span class="small">（Scaling Laws）</span></h2>
+  <div class="cols" style="gap:.8em;">
+    <div class="col" style="flex:1.3;">
+      <svg viewBox="0 0 460 320" style="width:100%; background:#fff; border:2px solid var(--tint); border-radius:.4em;" role="img" aria-label="スケーリング則の模式図。両対数グラフで、計算量が増えるとテスト損失がべき乗則で直線的に下がる">
+        <line x1="55" y1="272" x2="442" y2="272" stroke="#6b7280" stroke-width="2"/>
+        <line x1="55" y1="272" x2="55" y2="22" stroke="#6b7280" stroke-width="2"/>
+        <polygon points="442,272 432,267 432,277" fill="#6b7280"/>
+        <polygon points="55,22 50,32 60,32" fill="#6b7280"/>
+        <g font-size="14" fill="#6b7280" text-anchor="middle">
+          <text x="110" y="292">10⁻⁷</text><text x="192" y="292">10⁻⁵</text>
+          <text x="274" y="292">10⁻³</text><text x="356" y="292">10⁻¹</text><text x="428" y="292">10¹</text>
+          <text x="250" y="313">計算量 C（PF-days・対数目盛）</text>
+        </g>
+        <g font-size="14" fill="#6b7280" text-anchor="end">
+          <text x="48" y="52">6</text><text x="48" y="112">5</text>
+          <text x="48" y="172">4</text><text x="48" y="232">3</text>
+        </g>
+        <text x="18" y="160" font-size="15" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 160)">テスト損失（対数目盛）</text>
+        <line x1="72" y1="46" x2="426" y2="238" stroke="var(--teal)" stroke-width="3.5"/>
+        <g fill="var(--amber)" stroke="#b97a14" stroke-width="1">
+          <circle cx="86" cy="59" r="5"/><circle cx="122" cy="70" r="5"/><circle cx="158" cy="95" r="5"/>
+          <circle cx="196" cy="110" r="5"/><circle cx="233" cy="136" r="5"/><circle cx="270" cy="150" r="5"/>
+          <circle cx="308" cy="177" r="5"/><circle cx="345" cy="192" r="5"/><circle cx="382" cy="217" r="5"/>
+        </g>
+        <text x="285" y="105" font-size="19" fill="var(--teal-dark)" font-weight="bold" font-family="Times New Roman, serif"><tspan font-style="italic">L</tspan>(<tspan font-style="italic">C</tspan>) ∝ <tspan font-style="italic">C</tspan><tspan dy="-7" font-size="13">−0.050</tspan></text>
+      </svg>
+      <div class="figcap">Kaplan et al. (2020) Fig.1 をもとに再構成した模式図</div>
+    </div>
+    <div class="col" style="gap:.5em;">
+      <div class="card" style="font-size:.8em; margin:0;">両対数グラフで<b>直線</b> ＝ <b>べき乗則</b>。<b>7桁以上</b>にわたって成り立つ傾向も</div>
+      <div class="card" style="font-size:.8em; margin:0;">データ量 D・パラメータ数 N でも同じ形（α ≈ 0.095／0.076）</div>
+      <div class="card warm" style="font-size:.8em; margin:0;"><b class="accent">意味：</b>大きくすれば、どれだけ良くなるかが<b>式で予言できた</b>。だから世界はデータと計算力に投資した</div>
+    </div>
+  </div>
+  <p class="gray" style="font-size:.62em; margin-top:.25em;">出典: Kaplan, J. et al. (2020). Scaling Laws for Neural Language Models. arXiv:2001.08361 ／ Hoffmann, J. et al. (2022). arXiv:2203.15556</p>
+</section>
+
+<!-- 10 アルゴリズム：損失関数と勾配降下 -->
+<section class="slide">
+  <div class="kicker">柱3　アルゴリズム</div>
+  <h2>学習のしくみ<span class="small">— 損失関数と勾配降下法</span></h2>
+  <div class="fmcard">
+    <span class="fm"><i>L</i>(<i>θ</i>) = −<span class="frac"><span class="nu">1</span><span class="de"><i>T</i></span></span> <span class="bigop"><span class="hi"><i>T</i></span><span class="op">Σ</span><span class="lo"><i>t</i>=1</span></span> log <i>P</i><sub><i>θ</i></sub>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>&lt;<i>t</i></sub>)</span>
+    <div class="fmread"><b>交差エントロピー損失</b>：正解の言葉に低い確率をつけるほど、罰点が増える</div>
+  </div>
+  <div class="fmcard" style="background:var(--amber-tint); margin-top:.45em;">
+    <span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> <span class="frac"><span class="nu">∂<i>L</i></span><span class="de">∂<i>θ</i></span></span></span>
+    <div class="fmread"><b>勾配降下法</b>：罰点を<b>偏微分</b>して、減る方向に数十億個のパラメータ <i>θ</i> を少しずつ動かす（<i>η</i> ＝ 学習率）</div>
+  </div>
+  <p style="margin-top:.5em;">「学習」の正体は、<b>微分して、下る</b>。それを何兆回もくり返す</p>
+  <p class="teal" style="font-size:.8em; margin-top:.3em;">∂（偏微分）は高校の微分の親戚 — 正体は大学1年の「解析学」で習います</p>
+</section>
+
+<!-- 11 ベンチマーク（MMLU）＋投票 -->
+<section class="slide">
+  <div class="kicker">その結果、どこまで来たか</div>
+  <h2>性能は「測って」示す<span class="small">— ベンチマーク</span></h2>
+  <div class="cols" style="gap:.7em;">
+    <div class="col" style="flex:1.55;">
+      <svg viewBox="0 0 520 320" style="width:100%; background:#fff; border:2px solid var(--tint); border-radius:.4em;" role="img" aria-label="MMLUスコアの推移。2020年のGPT-3の43.9%から2023年のGPT-4の86.4%へ上がり、2025年には9割強で飽和">
+        <line x1="60" y1="282" x2="505" y2="282" stroke="#6b7280" stroke-width="2"/>
+        <line x1="60" y1="282" x2="60" y2="20" stroke="#6b7280" stroke-width="2"/>
+        <g font-size="14" fill="#6b7280" text-anchor="middle">
+          <text x="90" y="302">2020</text><text x="158" y="302">2021</text><text x="226" y="302">2022</text>
+          <text x="294" y="302">2023</text><text x="362" y="302">2024</text><text x="430" y="302">2025</text>
+        </g>
+        <g font-size="13" fill="#6b7280" text-anchor="end">
+          <text x="54" y="270">20</text><text x="54" y="208">40</text><text x="54" y="145">60</text><text x="54" y="83">80</text><text x="54" y="26">100</text>
+        </g>
+        <text x="20" y="155" font-size="15" fill="#6b7280" text-anchor="middle" transform="rotate(-90 20 155)">MMLU 正答率（%）</text>
+        <line x1="60" y1="250" x2="505" y2="250" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="500" y="245" font-size="13" fill="#6b7280" text-anchor="end">ランダム 25%</text>
+        <line x1="60" y1="63" x2="505" y2="63" stroke="#d6336c" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="500" y="58" font-size="13" fill="#d6336c" text-anchor="end">人間の専門家（推定）89.8%</text>
+        <polyline points="90,207 158,157 226,133 294,74 430,54" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
+        <g fill="var(--teal-dark)">
+          <circle cx="90" cy="207" r="6"/><circle cx="158" cy="157" r="6"/><circle cx="226" cy="133" r="6"/>
+          <circle cx="294" cy="74" r="6"/><circle cx="430" cy="54" r="6"/>
+        </g>
+        <g font-size="13.5" fill="var(--ink)" font-weight="bold">
+          <text x="98" y="212">GPT-3 43.9</text>
+          <text x="166" y="163">Gopher 60.0</text>
+          <text x="234" y="140">Chinchilla 67.5</text>
+          <text x="230" y="70">GPT-4 86.4</text>
+          <text x="378" y="42">o3 92.9（飽和）</text>
+        </g>
+      </svg>
+      <div class="figcap">出典: Hendrycks et al. (2021) ICLR ほか各モデルの公式報告（値は一次資料で確認）</div>
+    </div>
+    <div class="col" style="gap:.45em;">
+      <div class="card" style="font-size:.74em; margin:0;"><b class="teal">MMLU</b> ＝ 57科目・4択の学力テスト（Hendrycks et al., 2021）</div>
+      <div class="card" style="font-size:.74em; margin:0;">2023年、<b>人間の専門家レベルにほぼ到達</b>。いまは9割強で<b>飽和</b></div>
+      <div class="card warm" style="font-size:.74em; margin:0;"><b class="accent">→ 測り方も研究</b>：より難しい GPQA・HLE へ。HLE は2026年でも<b>約50%</b>＝伸びしろが残る</div>
+    </div>
+  </div>
+  <div class="fmbar" style="margin-top:.35em; font-size:.6em;">
+    <span style="font-size:1.3em;">📊</span><span class="note">AIはもう、ふつうの道具 — 学校でも生成AIが使えるようになってきています。ここで投票！　<b>①よく使っているAIは？</b>　<b>②じつは、これもAIです</b></span>
+  </div>
+</section>
+
+<!-- 12 今年のテーマ -->
 <section class="slide">
   <h2>今年のテーマ</h2>
   <p style="font-weight:800; font-size:1.1em; margin-bottom:.7em;">AIに「注文」して、自分のミニアプリを作る！</p>
@@ -274,7 +419,7 @@
   </ul>
 </section>
 
-<!-- 10 メニュー -->
+<!-- 13 メニュー（＋Dのやり方） -->
 <section class="slide">
   <div class="kicker">ステップ1</div>
   <h2>メニューから選んで、AIに注文しよう</h2>
@@ -286,10 +431,11 @@
     <div class="card col" style="margin:0;"><b>⚡ C. 反応速度</b><br><span style="font-size:.8em;">昨年のリベンジ</span></div>
     <div class="card warm col" style="margin:0;"><b>🚀 D. 自由×エージェント風</b><br><span style="font-size:.8em;">経験者むけ（あとで説明）</span></div>
   </div>
-  <p class="accent" style="margin-top:.8em;">注文文の全文は <b>slido</b> に → 長押しでコピーしよう！</p>
+  <p class="accent" style="margin-top:.55em;">注文文の全文は <b>slido</b> に → 長押しでコピーしよう！</p>
+  <div class="card warm" style="margin:.45em 0 0; font-size:.76em;"><b class="accent">Dのやり方（経験者・2段階注文）</b>：①「面白いミニゲームの<b>仕様を3行で提案して</b>」→ ②「その仕様を<b>単一HTMLで実装して</b>」— 計画から実装まで、AIに任せる（エージェント風）</div>
 </section>
 
-<!-- 11 注文の例 -->
+<!-- 14 注文の例 -->
 <section class="slide">
   <div class="kicker">ステップ1</div>
   <h2>注文の例（A. もぐらたたき）</h2>
@@ -302,17 +448,8 @@
   </ul>
 </section>
 
-<!-- 12 経験者向け -->
-<section class="slide">
-  <div class="kicker">経験者はこれ！</div>
-  <h2>「エージェント風」の注文</h2>
-  <div class="card warm" style="padding:.7em 1em;"><b>①</b>「反応速度ゲームより面白いミニゲームの<b>仕様を、3行で提案して</b>」</div>
-  <div class="card warm" style="padding:.7em 1em;"><b>②</b>「その仕様を、<b>外部ライブラリなしの単一HTMLで実装して</b>」</div>
-  <p class="teal" style="margin-top:.6em;">AIに「計画 → 実装 → 改善」までさせるのが、2026年流！</p>
-  <p class="gray" style="font-size:.8em;">この注文文も slido にあります</p>
-</section>
 
-<!-- 13 Geminiの使い方（昨年スクショ） -->
+<!-- 15 Geminiの使い方（2026実機） -->
 <section class="slide">
   <div class="kicker">ステップ1</div>
   <h2>AIの画面をひらこう</h2>
@@ -321,7 +458,7 @@
   <p class="gray" style="font-size:.8em; margin-top:.4em;">※ 当日の画面例は、授業内で投影します</p>
 </section>
 
-<!-- 14 ステップ2 うごかそう -->
+<!-- 16 ステップ2 うごかそう -->
 <section class="slide">
   <div class="kicker">ステップ2</div>
   <h2>うごかそう</h2>
@@ -334,38 +471,21 @@
   <p class="gray" style="font-size:.85em; margin-top:.45em;">それでもダメなら → もう一度おなじ注文／新しいチャットでやり直す／かんたんな B に切りかえる／先生を呼ぶ</p>
 </section>
 
-<!-- 15 ステップ3 追加注文 -->
+<!-- 17 追加注文と共有 -->
 <section class="slide">
   <div class="kicker">ステップ3</div>
-  <h2>AIに「追加注文」しよう</h2>
-  <p style="font-weight:700; margin-bottom:.6em;">変えたいところ（差分）だけ お願いするのがコツ！</p>
-  <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
+  <h2>追加注文 → 共有</h2>
+  <p style="font-weight:700; margin-bottom:.5em;">変えたいところ（差分）だけ お願いするのがコツ！</p>
+  <div class="cols" style="flex:0 0 auto; margin-bottom:.45em;">
     <div class="card col" style="margin:0;">✨ キラキラモグラは2倍点</div>
     <div class="card col" style="margin:0;">💣 爆弾をたたくと −5点</div>
-  </div>
-  <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
     <div class="card col" style="margin:0;">🚀 だんだんスピードアップ</div>
-    <div class="card col" style="margin:0;">🏆 ハイスコアを保存</div>
   </div>
-  <div class="cols" style="flex:0 0 auto;">
-    <div class="card col" style="margin:0;">🎨 見た目をかっこよく</div>
-    <div class="card col" style="margin:0;">🕹️ 自分だけのルールを追加</div>
-  </div>
-  <p class="teal" style="font-size:.92em; margin-top:.5em;">AIの方から「こうしたら？」と提案してくることも。乗ってみよう！</p>
-  <p class="gray" style="font-size:.8em; margin-top:.35em;">直らないときは、一から作り直してもらう方が早いことも…🙏</p>
+  <p class="teal" style="font-size:.9em; margin-bottom:.5em;">AIの方から「こうしたら？」と提案してくることも。乗ってみよう！</p>
+  <div class="card warm" style="font-size:.85em; margin-bottom:0;"><b class="accent">【余裕があれば】共有</b>：スクリーンショット（電源＋音量アップ）→ <b>slidoに貼る</b>（作品名と工夫も）→ 友だちの作品に 👍<br><span class="gray" style="font-size:.9em;">できた人だけでOK。あとからでも大丈夫です</span></div>
 </section>
 
-<!-- 16 共有 -->
-<section class="slide">
-  <div class="kicker">【余裕があれば】</div>
-  <h2>作品を共有しよう</h2>
-  <div class="row"><span class="num">1</span><span><b>スクリーンショット</b>を撮る（電源＋音量アップを同時押し）</span></div>
-  <div class="row"><span class="num">2</span><span><b>slido に貼る</b>。作品の名前と工夫したところも書こう</span></div>
-  <div class="row"><span class="num">3</span><span>友だちの作品に <b>👍</b> しよう</span></div>
-  <p class="gray" style="margin-top:.5em; font-size:.85em;">できた人だけでOK。あとからでも大丈夫です</p>
-</section>
-
-<!-- 17 演習ボード -->
+<!-- 18 演習ボード -->
 <section class="slide">
   <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.4em;">
     <span style="font-size:1.6em; font-weight:800;">演習タイム</span>
@@ -393,7 +513,7 @@
     </div>
     <div class="col" style="display:flex; flex-direction:column; align-items:center; gap:.4em;">
       <div class="timer" id="timerBox">
-        <div class="tval" id="timerVal">12:00</div>
+        <div class="tval" id="timerVal">10:00</div>
         <div class="thint" id="timerHint">タップでスタート</div>
       </div>
       <div class="qrbox" style="width:56%; aspect-ratio:1;">slido<br>（当日ご案内）</div>
@@ -401,7 +521,7 @@
   </div>
 </section>
 
-<!-- 18 まとめ -->
+<!-- 19 まとめ -->
 <section class="slide">
   <h2>まとめ</h2>
   <div class="card"><b>① AIは速い</b> — 数秒でアプリができる</div>
@@ -410,7 +530,7 @@
   <p class="teal" style="font-size:1.15em; margin-top:.6em;">これが「AIリテラシー」の第一歩</p>
 </section>
 
-<!-- 19 この先：AIエージェント -->
+<!-- 20 この先：AIエージェント -->
 <section class="slide">
   <div class="kicker">この先</div>
   <h2>AIが、自分でくり返すようになる</h2>
@@ -423,34 +543,35 @@
     <span style="font-size:.9em;">計画 → 実行 → 確認 → 修正 まで、<b>AIが自分で回す</b></span>
   </div>
   <p style="margin-top:.35em;">AIから「こうしたら？」と提案された人、いませんか。あれが入り口です</p>
-  <p class="teal" style="margin-top:.4em;">人の仕事は「<b>何を作りたいか</b>」を決めること</p>
+  <p class="teal" style="margin-top:.35em;">人の仕事は「<b>何を作りたいか</b>」を決めること</p>
+  <div class="card" style="font-size:.72em; margin:.4em 0 0;"><b class="teal">これも「測って」います</b>：実PC操作ベンチマーク <b>OSWorld</b> — エージェント 2024年 <b>12.2%</b> → 2026年 <b>90.2%</b>（人間の目安 72.4%）<span class="gray">　※2026年値は改訂版 OSWorld-Verified。出典: Xie et al. (2024) NeurIPS ／ 公式リーダーボード 2026-08</span></div>
 </section>
 
-<!-- 20 大学の中身は数学 -->
+<!-- 21 数学の回収（式再掲） -->
 <section class="slide">
   <div class="kicker">大学の中身</div>
-  <h2 style="margin-bottom:.5em;">今日さわったものの「本物」は、数学でできています</h2>
+  <h2 style="margin-bottom:.5em;">今日の式の「正体」は、大学1年の必修です</h2>
   <div class="mgrid">
-    <div class="mh">今日さわったもの</div>
-    <div class="mh">本物のAIでは</div>
+    <div class="mh">今日見た式</div>
+    <div class="mh">数学としての正体</div>
     <div class="mh">大学1年の必修</div>
 
-    <div class="mc">🗺️ ことばの地図<br><span class="gray">2次元の平面に並べた</span></div>
-    <div class="mc real">数百〜数千次元<br><span class="gray">人間には描けない</span></div>
+    <div class="mc"><span class="fm">ℝ<sup><i>d</i></sup>・cos(<b><i>u</i></b>,<b><i>v</i></b>)</span><br><span class="gray">🗺️ 単語埋め込み</span></div>
+    <div class="mc real">ベクトル・内積<br><span class="gray">数百〜数千次元の空間</span></div>
     <div class="mc sub">線形代数学1</div>
 
-    <div class="mc">🎲 次の言葉ガチャ<br><span class="gray">確率は先生が手で決めた</span></div>
-    <div class="mc real">数十億個の数字を<br><span class="gray">大量の文章から自動で調整</span></div>
+    <div class="mc"><span class="fm">∏ <i>P</i>(<i>w</i><sub><i>t</i></sub>|<i>w</i><sub>&lt;<i>t</i></sub>)・softmax</span><br><span class="gray">🎲 次トークン予測</span></div>
+    <div class="mc real">確率・統計<br><span class="gray">条件付き確率・分布</span></div>
     <div class="mc sub">統計確率A</div>
 
-    <div class="mc">その「調整」のやり方</div>
-    <div class="mc real"><b>微分</b><br><span class="gray">どっちに動かせば良くなるか</span></div>
+    <div class="mc"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> ∂<i>L</i>/∂<i>θ</i></span><br><span class="gray">学習（勾配降下法）</span></div>
+    <div class="mc real">微分（偏微分）<br><span class="gray">傾きを見て、下る</span></div>
     <div class="mc sub">解析学1</div>
   </div>
-  <p class="accent" style="margin-top:.45em;">この3つは、1年生で <b>ぜんぶ必修</b> です</p>
+  <p class="accent" style="margin-top:.45em;">今日の式は、1年生で <b>ぜんぶ必修</b> — さわった教材の先に、そのまま続いています</p>
   <p class="teal" style="margin-top:.25em; font-size:.92em;">✍️ そして、AIに伝える力＝<b>国語</b>。今日みんなが何度も書き直した、あれです</p>
 </section>
-<!-- 21 情報保障工学の研究（白石研究室） -->
+<!-- 22 情報保障工学の研究（白石研究室） -->
 <section class="slide">
   <div class="kicker">さっきの投票、おぼえていますか</div>
   <h2 style="margin-bottom:.45em;">「これもAI」を、<span class="accent">作る・良くする</span>研究</h2>
@@ -468,7 +589,7 @@
   <p style="font-weight:800; font-size:1.02em; margin-top:.35em;">情報保障を<span class="gray">受けるだけ</span>ではなく、<span class="accent">提供する側</span>になろう！</p>
   <p class="teal" style="font-size:.8em; margin-top:.35em;">★ 白石の授業：機械学習・演習／LLMと生成AI／情報保障技術学・演習／情報保障システム工学・演習／特別研究<br><b>情報科学コース・情報保障工学領域、どちらからでも白石研究室に入れます</b></p>
 </section>
-<!-- 22 研究の一例：HaptStarter と、その先輩のキャリア -->
+<!-- 23 研究の一例：HaptStarter と、その先輩のキャリア -->
 <section class="slide">
   <div class="kicker">研究って、どこまで行けるの？</div>
   <h2 style="margin-bottom:.45em;">スタートの音が聞こえないなら、<span class="accent">振動で</span></h2>
@@ -500,7 +621,7 @@
   </div>
 </section>
 
-<!-- 23 さいごに -->
+<!-- 24 さいごに -->
 <section class="slide">
   <h2>さいごに</h2>
   <img src="assets/avatar.png" alt="白石のアバター" style="position:absolute; top:5%; right:5%; height:22%; border-radius:.4em;">
@@ -514,7 +635,24 @@
   </div>
 </section>
 
-<!-- 24 予備 Copilot -->
+<!-- 25 参考文献 -->
+<section class="slide">
+  <h2>参考文献</h2>
+  <div style="font-size:.6em; line-height:1.8;">
+    <p>Vaswani, A. et al. (2017). Attention Is All You Need. <i>NeurIPS 2017</i>.</p>
+    <p>Kaplan, J. et al. (2020). Scaling Laws for Neural Language Models. arXiv:2001.08361.</p>
+    <p>Hendrycks, D. et al. (2021). Measuring Massive Multitask Language Understanding. <i>ICLR 2021</i>. arXiv:2009.03300.</p>
+    <p>Mikolov, T. et al. (2013). Efficient Estimation of Word Representations in Vector Space. arXiv:1301.3781.</p>
+    <p>Hoffmann, J. et al. (2022). Training Compute-Optimal Large Language Models. <i>NeurIPS 2022</i>. arXiv:2203.15556.</p>
+    <p>Rein, D. et al. (2023). GPQA: A Graduate-Level Google-Proof Q&amp;A Benchmark. arXiv:2311.12022.</p>
+    <p>Phan, L. et al. (2025). Humanity's Last Exam. arXiv:2501.14249.</p>
+    <p>Xie, T. et al. (2024). OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments. <i>NeurIPS 2024</i>. arXiv:2404.07972.</p>
+    <p>白石研究室（スポーツ支援・HaptStarter ほか）　https://www.shiraishi-lab.org/</p>
+  </div>
+  <p class="gray" style="font-size:.68em; margin-top:.4em;">スライド中のグラフ・数値は上記一次資料および各モデルの公式報告に基づく（スケーリング則の図は模式図）</p>
+</section>
+
+<!-- 26 予備 Copilot -->
 <section class="slide">
   <div class="kicker">予備（Geminiが使えない場合のみ）</div>
   <h2>Copilot で行う場合</h2>
@@ -525,7 +663,7 @@
   <div class="row"><span class="num">4</span><span>プレビューが出たら、そのまま遊べる（出なければ先生を呼ぼう）</span></div>
 </section>
 
-<!-- 25 予備 こまったら -->
+<!-- 27 予備 こまったら -->
 <section class="slide">
   <div class="kicker">こまったら</div>
   <h2>うまくいかないときは</h2>
@@ -554,7 +692,7 @@
 
   /* --- 進行ストップウォッチ ---------------------------------------------
      開始時刻が読めないので、時計ではなく「授業が始まってからの経過」で進行を見る。
-     経過時間と、32分プランに対する進み/遅れを出す。
+     経過時間と、34分プランに対する進み/遅れを出す。
      クリック=開始/一時停止、ダブルクリック=リセット、T キー=表示の切替。 */
   var swBox = document.createElement("div");
   swBox.id = "stopwatch";
@@ -562,11 +700,11 @@
   swBox.title = "クリック: 開始/一時停止　ダブルクリック: リセット　T: 表示切替";
   document.body.appendChild(swBox);
 
-  /* 各スライドに入っているはずの経過秒（32分プラン）。24・25は予備なので目安を置かない */
+  /* 各スライドに入っているはずの経過秒（34分プラン）。25は投影のみ、26・27は予備なので目安を置かない */
   var SW_PLAN = [
-    0, 45, 90, 210, 270, 330, 420, 510, 600, 640, 675, 715, 750, 795, 840, 870,
-    900,                       /* 17 演習ここから11分 */
-    1560, 1620, 1680, 1770, 1830, 1920, null, null
+    0, 45, 90, 210, 270, 360, 480, 630, 690, 780, 840, 930, 990, 1050, 1080, 1110, 1140,
+    1170,                      /* 18 演習ここから10分 */
+    1770, 1830, 1890, 1950, 1985, 2030, null, null, null
   ];
   var swRunning = false, swBase = 0, swAcc = 0;
 
@@ -627,10 +765,10 @@
     if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1));
     startX = null;
   });
-  /* 演習タイマー（17枚目）。タップで開始／一時停止、ダブルタップでリセット。
+  /* 演習タイマー（18枚目）。タップで開始／一時停止、ダブルタップでリセット。
      このスライドは演習中ずっと出しっぱなしになるので、画面内に置く。 */
   (function () {
-    var TOTAL = 12 * 60;
+    var TOTAL = 10 * 60;
     var box = document.getElementById("timerBox");
     if (!box) return;
     var val = document.getElementById("timerVal");
