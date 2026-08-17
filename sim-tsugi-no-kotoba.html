@@ -10,22 +10,22 @@
   body {
     font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
     background: #f4f7f7; color: #1f2933; min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; padding: 12px;
+    display: flex; flex-direction: column; align-items: center; padding: 8px 12px;
   }
   h1 { font-size: clamp(20px, 4vw, 30px); color: #0b6b6b; margin: 6px 0 2px; }
   .lead { font-size: clamp(14px, 2.6vw, 19px); color: #6b7280; margin-bottom: 10px; text-align: center; }
   #sentenceBox {
     width: 100%; max-width: 760px; background: #fff; border: 3px solid #0e8c8c;
-    border-radius: 14px; padding: 16px 18px; font-size: clamp(24px, 5vw, 40px);
-    font-weight: 700; min-height: 2.2em; line-height: 1.5; margin-bottom: 10px;
+    border-radius: 14px; padding: 10px 18px; font-size: clamp(24px, 5vw, 40px);
+    font-weight: 700; min-height: 1.7em; line-height: 1.5; margin-bottom: 8px;
   }
   #sentenceBox .cursor { color: #f2a93b; animation: blink 1s step-end infinite; }
   @keyframes blink { 50% { opacity: 0; } }
   .caption { font-size: clamp(15px, 2.8vw, 20px); font-weight: 700; color: #0b6b6b; margin: 6px 0; }
-  #choices { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 8px; }
+  #choices { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 6px; }
   .choice {
     position: relative; border: 0; border-radius: 12px; background: #e6f4f3;
-    overflow: hidden; cursor: pointer; text-align: left; padding: 0; height: 56px;
+    overflow: hidden; cursor: pointer; text-align: left; padding: 0; height: 48px;
   }
   .choice .bar { position: absolute; left: 0; top: 0; bottom: 0; background: #9fd6d4; transition: width .5s; }
   .choice .label {
@@ -33,7 +33,7 @@
     height: 100%; padding: 0 16px; font-size: clamp(18px, 3.6vw, 26px); font-weight: 700;
     font-family: inherit; color: #1f2933;
   }
-  .controls { display: flex; gap: 10px; margin: 14px 0 6px; flex-wrap: wrap; justify-content: center; }
+  .controls { display: flex; gap: 10px; margin: 8px 0 4px; flex-wrap: wrap; justify-content: center; }
   button.big {
     font-family: inherit; font-size: clamp(17px, 3.2vw, 22px); font-weight: 700;
     border: 0; border-radius: 12px; padding: 14px 22px; cursor: pointer;
@@ -48,13 +48,46 @@
   }
   .temp button.on { background: #0e8c8c; color: #fff; }
   #doneMsg { font-size: clamp(16px, 3vw, 22px); font-weight: 700; color: #b97a14; margin-top: 8px; text-align: center; }
+  /* 言葉を選ぶたびに「文の確率＝条件付き確率の掛け算」が育っていく表示 */
+  #formulaBar {
+    width: 100%; max-width: 760px; background: #fff; border: 2px dashed #0e8c8c;
+    border-radius: 10px; padding: 5px 10px; margin-bottom: 8px;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 3px 6px;
+    font-size: clamp(12px, 2.2vw, 16px); font-weight: 700;
+  }
+  #formulaBar .fx { font-family: "STIX Two Math", "Times New Roman", serif; font-weight: 400; }
+  #formulaBar .chip {
+    background: #e6f4f3; border-radius: 8px; padding: 2px 8px; white-space: nowrap;
+    display: inline-flex; align-items: baseline; gap: 4px;
+  }
+  #formulaBar .chip .w { color: #0b6b6b; }
+  #formulaBar .chip .cond { color: #6b7280; font-weight: 400; font-size: .85em; }
+  #formulaBar .chip .pr { color: #b97a14; font-size: .85em; }
+  #formulaBar .times { color: #6b7280; }
   footer { margin-top: auto; padding-top: 12px; font-size: 12px; color: #6b7280; text-align: center; }
+  /* 背の低い画面（4:3プロジェクタでスライドに埋め込んだ時など）は全体を詰める。
+     式バーが出ても、選択肢5つ＋操作ボタンまで1画面に収まるように。 */
+  @media (max-height: 640px) {
+    h1 { font-size: 20px; margin: 2px 0 0; }
+    .lead { font-size: 13px; margin-bottom: 5px; }
+    #sentenceBox { font-size: 24px; min-height: 1.4em; padding: 6px 14px; margin-bottom: 6px; }
+    .choice { height: 40px; }
+    .choice .label { font-size: 17px; }
+    .caption { font-size: 14px; margin: 3px 0; }
+    #formulaBar { font-size: 12px; padding: 4px 8px; margin-bottom: 6px; }
+    button.big { font-size: 16px; padding: 8px 14px; }
+    .controls { margin: 6px 0 2px; }
+    .temp { padding: 4px 8px; }
+    .temp button { font-size: 13px; padding: 5px 8px; }
+    footer { display: none; }
+  }
 </style>
 </head>
 <body>
   <h1>🎲 次の言葉ガチャ</h1>
   <p class="lead">AIは「次に来る言葉」を<b>確率</b>で選んでいるだけ！ 言葉をタップして文を作ろう</p>
   <div id="sentenceBox"></div>
+  <div id="formulaBar" style="display:none;"></div>
   <p class="caption">次に来る言葉は？（％は AIが考えた確率）</p>
   <div id="choices"></div>
   <div class="controls">
@@ -106,6 +139,8 @@
   var sBox = document.getElementById("sentenceBox");
   var choicesEl = document.getElementById("choices");
   var doneMsg = document.getElementById("doneMsg");
+  var fBar = document.getElementById("formulaBar");
+  var picks = [];  /* [{w: 選んだ語, p: 表示していた確率%}] */
 
   function candidates() {
     if (!sentence) return START.map(function (w) { return [w, Math.round(100 / START.length)]; });
@@ -122,8 +157,30 @@
     return cands.map(function (c, i) { return [c[0], ws[i] / sum]; });
   }
 
+  /* 選んだ言葉が w に入り、条件付き確率の掛け算として式が育っていく。
+     5枚目の「今日の式」が、目の前の操作と同じものだと分かるように。 */
+  function renderFormula() {
+    if (!picks.length) { fBar.style.display = "none"; return; }
+    fBar.style.display = "flex";
+    var html = '<span>文の確率 ＝</span>';
+    var ctx = "";
+    picks.forEach(function (pk, i) {
+      if (i > 0) html += '<span class="times">×</span>';
+      var cond = "";
+      if (i > 0) {
+        var c = ctx.length > 9 ? "…" + ctx.slice(-8) : ctx;
+        cond = ' <span class="fx">|</span> <span class="cond">' + c + '</span>';
+      }
+      html += '<span class="chip"><span class="fx">P(</span><span class="w">' + pk.w + '</span>' + cond +
+        '<span class="fx">)</span><span class="pr">' + pk.p + '%</span></span>';
+      ctx += pk.w;
+    });
+    fBar.innerHTML = html;
+  }
+
   function render() {
     sBox.innerHTML = (sentence || "（下から選んでスタート）") + '<span class="cursor">▊</span>';
+    renderFormula();
     choicesEl.innerHTML = "";
     doneMsg.textContent = "";
     var cands = candidates();
@@ -141,7 +198,14 @@
     });
   }
 
-  function pick(word) { sentence = sentence ? sentence + word : word; render(); }
+  function pick(word) {
+    var cands = candidates();
+    var p = 0;
+    (cands || []).forEach(function (c) { if (c[0] === word) p = c[1]; });
+    picks.push({ w: word, p: p });
+    sentence = sentence ? sentence + word : word;
+    render();
+  }
 
   function gacha() {
     var cands = candidates();
@@ -155,7 +219,7 @@
   }
 
   document.getElementById("gachaBtn").addEventListener("click", gacha);
-  document.getElementById("resetBtn").addEventListener("click", function () { sentence = ""; render(); });
+  document.getElementById("resetBtn").addEventListener("click", function () { sentence = ""; picks = []; render(); });
   document.querySelectorAll(".temp button").forEach(function (b) {
     b.addEventListener("click", function () {
       temp = b.dataset.t;
