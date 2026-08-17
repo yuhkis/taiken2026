@@ -57,18 +57,6 @@
   .col:not(.card) { display: flex; flex-direction: column; justify-content: center; }
   /* 段の中のカードも潰さない。潰れると自動フィットが過剰に縮小してしまう */
   .col > .card { flex-shrink: 0; }
-  /* 21枚目: カリキュラム（令和7年度以降カリキュラム・情報科学コース） */
-  .col.curr { justify-content: flex-start; gap: .45em; }
-  .curr .ch {
-    background: var(--teal); color: #fff; font-weight: 800; text-align: center;
-    border-radius: .4em; padding: .22em 0; font-size: .92em; letter-spacing: .02em;
-  }
-  .curr .ci {
-    background: var(--tint); border-radius: .4em; padding: .45em .55em;
-    font-weight: 700; font-size: .78em; line-height: 1.35;
-  }
-  .curr .ci.mine { background: var(--amber-tint); color: var(--amber-dark); }
-  .curr .ci.mine::before { content: "★ "; }
   /* 「今日の教材 → 本物 → 大学1年の必修」の対応表 */
   .mgrid { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: .38em; font-size: .82em; }
   .mgrid .mh {
@@ -137,7 +125,7 @@
   .slide.sim-slide { padding: 2.6% 3.2% 3.4%; }
   .sim-slide h2 { font-size: 1.15em; margin-bottom: .22em; }
   a { color: var(--teal-dark); }
-  /* タップで写真の一点にズームインする図（22枚目のHaptStarter）。
+  /* タップで写真の一点にズームインする図（23枚目のHaptStarter）。
      --fx / --fy でズームの中心を写真ごとに指定する。 */
   .zoomshot {
     position: relative; width: 100%; aspect-ratio: var(--ar, 16 / 9); overflow: hidden;
@@ -268,8 +256,8 @@
   <div class="simwrap">
     <iframe class="sim" src="sim-tsugi-no-kotoba.html" title="次の言葉ガチャ"></iframe>
     <div class="fmbar">
-      <span class="fm"><i>P</i>(<i>w</i><sub><i>i</i></sub>) = <span class="frac"><span class="nu">exp(<i>z</i><sub><i>i</i></sub> / <i>T</i>)</span><span class="de">Σ<sub><i>j</i></sub> exp(<i>z</i><sub><i>j</i></sub> / <i>T</i>)</span></span></span>
-      <span class="note"><b>ソフトマックス関数</b>。<i>T</i> ＝ <b>温度</b> —「まじめ／ふつう／ガチャ」が <i>T</i> の切り替え</span>
+      <span class="fm"><i>P</i>(<i>w</i><sub><i>i</i></sub> | <i>w</i><sub>&lt;<i>t</i></sub>) = <span class="frac"><span class="nu">exp(<i>z</i><sub><i>i</i></sub> / <i>τ</i>)</span><span class="de">Σ<sub><i>j</i></sub> exp(<i>z</i><sub><i>j</i></sub> / <i>τ</i>)</span></span></span>
+      <span class="note"><b>ソフトマックス関数</b>＝前ページの式の中身。<i>τ</i>（タウ）＝ <b>温度</b> —「まじめ／ふつう／ガチャ」が <i>τ</i> の切り替え</span>
     </div>
   </div>
 </section>
@@ -313,12 +301,8 @@
         <polygon points="55,22 50,32 60,32" fill="#6b7280"/>
         <g font-size="14" fill="#6b7280" text-anchor="middle">
           <text x="110" y="292">10⁻⁷</text><text x="192" y="292">10⁻⁵</text>
-          <text x="274" y="292">10⁻³</text><text x="356" y="292">10⁻¹</text><text x="428" y="292">10¹</text>
+          <text x="274" y="292">10⁻³</text><text x="356" y="292">10⁻¹</text><text x="438" y="292">10¹</text>
           <text x="250" y="313">計算量 C（PF-days・対数目盛）</text>
-        </g>
-        <g font-size="14" fill="#6b7280" text-anchor="end">
-          <text x="48" y="52">6</text><text x="48" y="112">5</text>
-          <text x="48" y="172">4</text><text x="48" y="232">3</text>
         </g>
         <text x="18" y="160" font-size="15" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 160)">テスト損失（対数目盛）</text>
         <line x1="72" y1="46" x2="426" y2="238" stroke="var(--teal)" stroke-width="3.5"/>
@@ -370,24 +354,24 @@
           <text x="294" y="302">2023</text><text x="362" y="302">2024</text><text x="430" y="302">2025</text>
         </g>
         <g font-size="13" fill="#6b7280" text-anchor="end">
-          <text x="54" y="270">20</text><text x="54" y="208">40</text><text x="54" y="145">60</text><text x="54" y="83">80</text><text x="54" y="26">100</text>
+          <text x="54" y="287">20</text><text x="54" y="225">40</text><text x="54" y="163">60</text><text x="54" y="101">80</text><text x="54" y="39">100</text>
         </g>
         <text x="20" y="155" font-size="15" fill="#6b7280" text-anchor="middle" transform="rotate(-90 20 155)">MMLU 正答率（%）</text>
-        <line x1="60" y1="250" x2="505" y2="250" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6 5"/>
-        <text x="500" y="245" font-size="13" fill="#6b7280" text-anchor="end">ランダム 25%</text>
-        <line x1="60" y1="63" x2="505" y2="63" stroke="#d6336c" stroke-width="1.5" stroke-dasharray="6 5"/>
-        <text x="500" y="58" font-size="13" fill="#d6336c" text-anchor="end">人間の専門家（推定）89.8%</text>
-        <polyline points="90,207 158,157 226,133 294,74 430,54" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
+        <line x1="60" y1="266" x2="505" y2="266" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="500" y="261" font-size="13" fill="#6b7280" text-anchor="end">ランダム 25%</text>
+        <line x1="60" y1="66" x2="505" y2="66" stroke="#d6336c" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="500" y="61" font-size="13" fill="#d6336c" text-anchor="end">人間の専門家（推定）89.8%</text>
+        <polyline points="90,208 158,158 226,135 294,76 430,56" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
         <g fill="var(--teal-dark)">
-          <circle cx="90" cy="207" r="6"/><circle cx="158" cy="157" r="6"/><circle cx="226" cy="133" r="6"/>
-          <circle cx="294" cy="74" r="6"/><circle cx="430" cy="54" r="6"/>
+          <circle cx="90" cy="208" r="6"/><circle cx="158" cy="158" r="6"/><circle cx="226" cy="135" r="6"/>
+          <circle cx="294" cy="76" r="6"/><circle cx="430" cy="56" r="6"/>
         </g>
         <g font-size="13.5" fill="var(--ink)" font-weight="bold">
-          <text x="98" y="212">GPT-3 43.9</text>
-          <text x="166" y="163">Gopher 60.0</text>
-          <text x="234" y="140">Chinchilla 67.5</text>
-          <text x="230" y="70">GPT-4 86.4</text>
-          <text x="378" y="42">o3 92.9（飽和）</text>
+          <text x="98" y="213">GPT-3 43.9</text>
+          <text x="166" y="164">Gopher 60.0</text>
+          <text x="234" y="142">Chinchilla 67.5</text>
+          <text x="228" y="72">GPT-4 86.4</text>
+          <text x="376" y="44">o3 92.9（飽和）</text>
         </g>
       </svg>
       <div class="figcap">出典: Hendrycks et al. (2021) ICLR ほか各モデルの公式報告（値は一次資料で確認）</div>
@@ -702,9 +686,9 @@
 
   /* 各スライドに入っているはずの経過秒（34分プラン）。25は投影のみ、26・27は予備なので目安を置かない */
   var SW_PLAN = [
-    0, 45, 90, 210, 270, 360, 480, 630, 690, 780, 840, 930, 990, 1050, 1080, 1110, 1140,
-    1170,                      /* 18 演習ここから10分 */
-    1770, 1830, 1890, 1950, 1985, 2030, null, null, null
+    0, 45, 90, 210, 270, 360, 480, 630, 690, 780, 840, 930, 990, 1020, 1080, 1110, 1170,
+    1200,                      /* 18 演習ここから10分 */
+    1800, 1860, 1920, 1980, 2010, 2070, null, null, null
   ];
   var swRunning = false, swBase = 0, swAcc = 0;
 
@@ -742,7 +726,7 @@
     counter.textContent = (cur + 1) + " / " + slides.length;
     location.hash = cur + 1;
     /* 1枚目から進んだら自動で計り始める（押し忘れ防止）。
-       読み込み直後は数えない（#22 などで直接開いて確認するときに動き出さないように） */
+       読み込み直後は数えない（#23 などで直接開いて確認するときに動き出さないように） */
     if (booted && prev === 0 && cur > 0) swStart();
     swPaint();
   }
@@ -808,7 +792,7 @@
     paint();
   })();
 
-  /* 22枚目の写真。まず全体（構えた選手・光の合図・指先の装置）を見せ、
+  /* 23枚目の写真。まず全体（構えた選手・光の合図・指先の装置）を見せ、
      タップで指先の装置へズームインする。もう一度タップで全体に戻る。 */
   (function () {
     var shot = document.getElementById("haptShot");
