@@ -245,8 +245,9 @@
     <span class="fm"><i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>1</sub>, …, <i>w</i><sub><i>t</i>−1</sub>)</span>
     <div class="fmread">読み下し：「ここまでの言葉」を条件にした、「次の言葉 <i>w</i><sub><i>t</i></sub>」の確率（<b>条件付き確率</b>）。今日の式は、これ1本だけ</div>
   </div>
-  <div class="card" style="font-size:.84em; margin-top:.5em;"><b class="teal">用語：自己回帰（autoregressive）</b>　この確率で1語えらぶ → 文にたす → また計算する。<b>このくり返しだけで文章ができる</b></div>
-  <p style="margin-top:.4em;">大量の文章から、この確率を学習した。<b class="accent">確率で動く ＝ ガチャ</b>。次のページで、指でさわって確かめます</p>
+  <div class="card warm" style="font-size:.8em; margin-top:.45em;"><b class="accent">これが「言語モデル」という考え方</b>　文の「自然さ」を確率で表す。すると——<b>① ヘンな文と自然な文を見分けられる</b>　<b>② 確率にしたがって選び続ければ、自然な文を作れる</b>（＝生成AI）</div>
+  <div class="card" style="font-size:.8em; margin-top:.4em;"><b class="teal">用語：自己回帰（autoregressive）</b>　この確率で1語えらぶ → 文にたす → また計算する。このくり返しで②を実行する</div>
+  <p style="margin-top:.35em; font-size:.92em;">大量の文章から、この確率を学習した。<b class="accent">確率で動く ＝ ガチャ</b>。次のページで、指でさわって確かめます</p>
 </section>
 
 <!-- 6 さわって理解① 次トークン予測 -->
@@ -277,6 +278,9 @@
 <section class="slide">
   <div class="kicker">なぜ今、ここまで動くのか</div>
   <h2>LLMを成立させた「3つの柱」</h2>
+  <div class="fmbar" style="margin-bottom:.55em; font-size:.6em;">
+    <span class="note">ここまでの整理：<b>ことば</b> →（<b>単語埋め込み</b>で数にする）→ <b>ベクトル</b> →（計算する）→ <b>次の言葉の確率</b> →（くり返す）→ <b>文章</b>。この「言語モデル」を<b>うんと大きく</b>したものが LLM（<b>大規模</b>言語モデル）</span>
+  </div>
   <div class="cols" style="flex:0 0 auto; gap:.6em;">
     <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">📚</div><b class="teal">ビッグデータ</b><br><span style="font-size:.76em;">兆単位のトークン<br>（Web全体の文章）</span></div>
     <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">⚡</div><b class="teal">計算力</b><br><span style="font-size:.76em;">GPUによる<br>桁違いの演算量</span></div>
