@@ -274,23 +274,53 @@
   </div>
 </section>
 
-<!-- 8 なぜ今動くのか：3つの柱 -->
+<!-- 8 学習のしくみ（タップで動くグラフ） -->
+<section class="slide">
+  <div class="kicker">その確率は、どう覚えるのか</div>
+  <h2>学習のしくみ<span class="small">— 「罰点」が減る方向へ、少しずつ</span></h2>
+  <div class="cols" style="gap:.8em;">
+    <div class="col" style="flex:1.55;">
+      <svg id="lossFig" viewBox="0 0 640 330" style="width:100%; background:#fff; border:2px solid var(--tint); border-radius:.4em; cursor:pointer;" role="img" aria-label="学習のしくみの図。タップするたびに、罰点のグラフの上で傾きが表示され、玉が谷底へ1歩ずつ下りる">
+        <line x1="50" y1="295" x2="622" y2="295" stroke="#6b7280" stroke-width="2"/>
+        <line x1="50" y1="295" x2="50" y2="24" stroke="#6b7280" stroke-width="2"/>
+        <polygon points="622,295 612,290 612,300" fill="#6b7280"/>
+        <polygon points="50,24 45,34 55,34" fill="#6b7280"/>
+        <text x="600" y="318" font-size="16" fill="#6b7280" text-anchor="end">パラメータ θ の値</text>
+        <text x="24" y="160" font-size="16" fill="#6b7280" text-anchor="middle" transform="rotate(-90 24 160)">罰点 L（損失）</text>
+        <path d="M 90,55.0 L 110,81.2 L 130,105.7 L 150,128.4 L 170,149.4 L 190,168.6 L 210,186.1 L 230,201.9 L 250,215.8 L 270,228.1 L 290,238.6 L 310,247.3 L 330,254.3 L 350,259.5 L 370,263.0 L 390,264.8 L 410,264.8 L 430,263.0 L 450,259.5 L 470,254.3 L 490,247.3 L 510,238.6 L 530,228.1 L 550,215.8 L 570,201.9 L 590,186.1 L 610,168.6" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
+        <line id="lossTan" x1="0" y1="0" x2="0" y2="0" stroke="var(--amber-dark)" stroke-width="3.5" opacity="0"/>
+        <text id="lossTanLbl" x="0" y="0" font-size="17" fill="var(--amber-dark)" font-weight="bold" opacity="0">傾き</text>
+        <circle id="lossBall" cx="120" cy="82" r="11" fill="var(--amber)" stroke="#b97a14" stroke-width="2"/>
+        <text id="lossMsg" x="360" y="52" font-size="18" text-anchor="middle" font-weight="bold" fill="var(--teal-dark)">タップしてスタート</text>
+      </svg>
+      <div class="figcap">タップで1歩ずつ：傾きを見る → 罰点が減る方向へ動く → くり返す</div>
+    </div>
+    <div class="col" style="gap:.5em;">
+      <div class="fmcard" style="margin:0;"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> × 傾き</span>
+        <div class="fmread">傾きのぶんだけ、罰点が減る方向へ動かす（<i>η</i> ＝ 1歩の大きさ）</div></div>
+      <div class="card" style="font-size:.78em; margin:0;">「傾き」を式で求める方法が<b>微分</b>。まだ習っていなくても大丈夫 — <b>今日は絵で分かればOK</b></div>
+      <div class="card warm" style="font-size:.78em; margin:0;"><b class="accent">学習の正体：</b>これを<b>数十億個のパラメータ</b>で、何兆回もくり返す（大学では<b>偏微分 ∂</b> として習う → 解析学）</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 なぜ今動くのか：3つの柱 -->
 <section class="slide">
   <div class="kicker">なぜ今、ここまで動くのか</div>
   <h2>LLMを成立させた「3つの柱」</h2>
   <div class="fmbar" style="margin-bottom:.55em; font-size:.6em;">
-    <span class="note">ここまでの整理：<b>ことば</b> →（<b>単語埋め込み</b>で数にする）→ <b>ベクトル</b> →（計算する）→ <b>次の言葉の確率</b> →（くり返す）→ <b>文章</b>。この「言語モデル」を<b>うんと大きく</b>したものが LLM（<b>大規模</b>言語モデル）</span>
+    <span class="note">ここまでの整理：<b>ことば</b> →（<b>単語埋め込み</b>で数にする）→ <b>ベクトル</b> →（計算する）→ <b>次の言葉の確率</b> →（くり返す）→ <b>文章</b>。その確率は<b>学習</b>（前ページ：傾きで調整）で覚えた。これを<b>うんと大きく</b>したものが LLM（<b>大規模</b>言語モデル）</span>
   </div>
   <div class="cols" style="flex:0 0 auto; gap:.6em;">
     <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">📚</div><b class="teal">ビッグデータ</b><br><span style="font-size:.76em;">兆単位のトークン<br>（Web全体の文章）</span></div>
     <div class="card col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">⚡</div><b class="teal">計算力</b><br><span style="font-size:.76em;">GPUによる<br>桁違いの演算量</span></div>
-    <div class="card warm col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">🧮</div><b class="accent">アルゴリズム</b><br><span style="font-size:.76em;">Transformer<br>＋ 勾配降下法</span></div>
+    <div class="card warm col" style="margin:0; text-align:center;"><div style="font-size:1.5em;">🧮</div><b class="accent">アルゴリズム</b><br><span style="font-size:.76em;">Transformer<br>＋ 勾配降下法<br>（前ページの「学習」）</span></div>
   </div>
-  <p style="margin-top:.7em;">3つが <b>2020年代に揃った</b>。次の2枚で、「データ×計算力」と「アルゴリズム」を数字と式で見ます</p>
+  <p style="margin-top:.7em;">3つが <b>2020年代に揃った</b>。アルゴリズム（学習）は前のページで見ました。<b>データ×計算力</b>の効きめを、次の枚で数字で見ます</p>
   <p class="gray" style="font-size:.7em; margin-top:.3em;">Transformer: Vaswani et al. (2017) <i>Attention Is All You Need</i>. NeurIPS 2017</p>
 </section>
 
-<!-- 9 スケーリング則 -->
+<!-- 10 スケーリング則 -->
 <section class="slide">
   <div class="kicker">柱1・2　ビッグデータ × 計算力</div>
   <h2>スケーリング則<span class="small">（Scaling Laws）</span></h2>
@@ -324,36 +354,6 @@
     </div>
   </div>
   <p class="gray" style="font-size:.62em; margin-top:.25em;">出典: Kaplan, J. et al. (2020). Scaling Laws for Neural Language Models. arXiv:2001.08361 ／ Hoffmann, J. et al. (2022). arXiv:2203.15556</p>
-</section>
-
-<!-- 10 アルゴリズム：学習のしくみ（タップで動くグラフ） -->
-<section class="slide">
-  <div class="kicker">柱3　アルゴリズム</div>
-  <h2>学習のしくみ<span class="small">— 「罰点」が減る方向へ、少しずつ</span></h2>
-  <div class="cols" style="gap:.8em;">
-    <div class="col" style="flex:1.55;">
-      <svg id="lossFig" viewBox="0 0 640 330" style="width:100%; background:#fff; border:2px solid var(--tint); border-radius:.4em; cursor:pointer;" role="img" aria-label="学習のしくみの図。タップするたびに、罰点のグラフの上で傾きが表示され、玉が谷底へ1歩ずつ下りる">
-        <line x1="50" y1="295" x2="622" y2="295" stroke="#6b7280" stroke-width="2"/>
-        <line x1="50" y1="295" x2="50" y2="24" stroke="#6b7280" stroke-width="2"/>
-        <polygon points="622,295 612,290 612,300" fill="#6b7280"/>
-        <polygon points="50,24 45,34 55,34" fill="#6b7280"/>
-        <text x="600" y="318" font-size="16" fill="#6b7280" text-anchor="end">パラメータ θ の値</text>
-        <text x="24" y="160" font-size="16" fill="#6b7280" text-anchor="middle" transform="rotate(-90 24 160)">罰点 L（損失）</text>
-        <path d="M 90,55.0 L 110,81.2 L 130,105.7 L 150,128.4 L 170,149.4 L 190,168.6 L 210,186.1 L 230,201.9 L 250,215.8 L 270,228.1 L 290,238.6 L 310,247.3 L 330,254.3 L 350,259.5 L 370,263.0 L 390,264.8 L 410,264.8 L 430,263.0 L 450,259.5 L 470,254.3 L 490,247.3 L 510,238.6 L 530,228.1 L 550,215.8 L 570,201.9 L 590,186.1 L 610,168.6" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
-        <line id="lossTan" x1="0" y1="0" x2="0" y2="0" stroke="var(--amber-dark)" stroke-width="3.5" opacity="0"/>
-        <text id="lossTanLbl" x="0" y="0" font-size="17" fill="var(--amber-dark)" font-weight="bold" opacity="0">傾き</text>
-        <circle id="lossBall" cx="120" cy="82" r="11" fill="var(--amber)" stroke="#b97a14" stroke-width="2"/>
-        <text id="lossMsg" x="360" y="52" font-size="18" text-anchor="middle" font-weight="bold" fill="var(--teal-dark)">タップしてスタート</text>
-      </svg>
-      <div class="figcap">タップで1歩ずつ：傾きを見る → 罰点が減る方向へ動く → くり返す</div>
-    </div>
-    <div class="col" style="gap:.5em;">
-      <div class="fmcard" style="margin:0;"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> × 傾き</span>
-        <div class="fmread">傾きのぶんだけ、罰点が減る方向へ動かす（<i>η</i> ＝ 1歩の大きさ）</div></div>
-      <div class="card" style="font-size:.78em; margin:0;">「傾き」を式で求める方法が<b>微分</b>。まだ習っていなくても大丈夫 — <b>今日は絵で分かればOK</b></div>
-      <div class="card warm" style="font-size:.78em; margin:0;"><b class="accent">学習の正体：</b>これを<b>数十億個のパラメータ</b>で、何兆回もくり返す（大学では<b>偏微分 ∂</b> として習う → 解析学）</div>
-    </div>
-  </div>
 </section>
 
 <!-- 11 ベンチマーク（MMLU）＋投票 -->
@@ -704,7 +704,7 @@
 
   /* 各スライドに入っているはずの経過秒（35分プラン）。25は投影のみ、26・27は予備なので目安を置かない */
   var SW_PLAN = [
-    0, 45, 90, 240, 300, 390, 510, 660, 720, 810, 900, 960, 1005, 1050, 1110, 1140, 1170,
+    0, 45, 90, 240, 300, 390, 510, 660, 750, 810, 900, 960, 1005, 1050, 1110, 1140, 1170,
     1200,                      /* 18 演習ここから10分 */
     1800, 1860, 1920, 1980, 2010, 2070, null, null, null
   ];
