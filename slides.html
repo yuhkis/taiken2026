@@ -220,7 +220,7 @@
         <li>注文文（プロンプト）は <b>slido</b> にあります</li>
         <li>質問も slido へ。<b>名前は書かなくてOK</b></li>
         <li><b>保護者の方も、ご自身のスマホでご参加ください</b></li>
-        <li>アンケートは、演習のあいまでOKです</li>
+        <li><b>練習</b>：slidoに<b>投票が2問</b>出ています。いま答えてみよう<br><span class="gray" style="font-size:.8em;">①よく使っているAIは？　②じつは、これもAIです</span></li>
       </ul>
     </div>
     <div class="col" style="flex:0 0 38%; display:flex; flex-direction:column; align-items:center; gap:.4em;">
@@ -233,9 +233,8 @@
 <section class="slide">
   <h2>本日の目標 <span class="small">— 大学の情報系は「楽しくて、深い」</span></h2>
   <div class="card"><span class="num">1</span><b>楽しい：</b>AIに「注文」して、自分のアプリを作る</div>
-  <div class="card"><span class="num">2</span><b>深い：</b>LLMのしくみを、さわって・<b>数式で</b>理解する</div>
-  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感し、<b>原理の式を持ち帰る</b> ＝ AIリテラシー</div>
-  <p class="accent" style="margin-top:.6em;">去年やった人も、はじめての人も、今日は同じスタートです！</p>
+  <div class="card"><span class="num">2</span><b>深い：</b>LLMのしくみを、さわって理解する（本物の式も<b>1つだけ</b>）</div>
+  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感する ＝ AIリテラシー</div>
 </section>
 
 <!-- 5 LLMの定義（式1: 自己回帰） -->
@@ -243,10 +242,10 @@
   <div class="kicker">AIの正体</div>
   <h2>大規模言語モデル（LLM）<span class="small">＝「次のトークン」の確率を計算する関数</span></h2>
   <div class="fmcard">
-    <span class="fm"><i>P</i>(<i>w</i><sub>1</sub>, <i>w</i><sub>2</sub>, …, <i>w</i><sub><i>T</i></sub>) = <span class="bigop"><span class="hi"><i>T</i></span><span class="op">∏</span><span class="lo"><i>t</i>=1</span></span> <i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>1</sub>, …, <i>w</i><sub><i>t</i>−1</sub>)</span>
-    <div class="fmread">読み下し：文章ぜんたいの確率は、「次の言葉（トークン）の確率」の<b>掛け算</b>でできている</div>
+    <span class="fm"><i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>1</sub>, …, <i>w</i><sub><i>t</i>−1</sub>)</span>
+    <div class="fmread">読み下し：「ここまでの言葉」を条件にした、「次の言葉 <i>w</i><sub><i>t</i></sub>」の確率（<b>条件付き確率</b>）。今日の式は、これ1本だけ</div>
   </div>
-  <div class="card" style="font-size:.84em; margin-top:.5em;"><b class="teal">用語：自己回帰（autoregressive）</b>　前までの言葉を条件に、次の1語の確率を出す。これをくり返して文章を作る</div>
+  <div class="card" style="font-size:.84em; margin-top:.5em;"><b class="teal">用語：自己回帰（autoregressive）</b>　この確率で1語えらぶ → 文にたす → また計算する。<b>このくり返しだけで文章ができる</b></div>
   <p style="margin-top:.4em;">大量の文章から、この確率を学習した。<b class="accent">確率で動く ＝ ガチャ</b>。次のページで、指でさわって確かめます</p>
 </section>
 
@@ -256,8 +255,8 @@
   <div class="simwrap">
     <iframe class="sim" src="sim-tsugi-no-kotoba.html" title="次の言葉ガチャ"></iframe>
     <div class="fmbar">
-      <span class="fm"><i>P</i>(<i>w</i><sub><i>i</i></sub> | <i>w</i><sub>&lt;<i>t</i></sub>) = <span class="frac"><span class="nu">exp(<i>z</i><sub><i>i</i></sub> / <i>τ</i>)</span><span class="de">Σ<sub><i>j</i></sub> exp(<i>z</i><sub><i>j</i></sub> / <i>τ</i>)</span></span></span>
-      <span class="note"><b>ソフトマックス関数</b>＝前ページの式の中身。<i>τ</i>（タウ）＝ <b>温度</b> —「まじめ／ふつう／ガチャ」が <i>τ</i> の切り替え</span>
+      <span style="font-size:1.25em;">🌡️</span>
+      <span class="note">いま動かしているのが、前のページの式 <span class="fm"><i>P</i>(<i>w</i><sub><i>t</i></sub> | …)</span> そのもの。<b>温度</b>＝確率の差をならす「ガチャ度」のつまみ —「まじめ／ふつう／ガチャ」がその切り替え（本物のAIの設定にも同じ項目があります）</span>
     </div>
   </div>
 </section>
@@ -268,9 +267,8 @@
   <div class="simwrap">
     <iframe class="sim" src="sim-kotoba-no-chizu.html" title="ことばの地図"></iframe>
     <div class="fmbar">
-      <span class="fm">cos(<b><i>u</i></b>, <b><i>v</i></b>) = <span class="frac"><span class="nu"><b><i>u</i></b> · <b><i>v</i></b></span><span class="de">‖<b><i>u</i></b>‖ ‖<b><i>v</i></b>‖</span></span></span>
       <span class="fm"><b><i>v</i></b><sub>王様</sub> − <b><i>v</i></b><sub>男性</sub> + <b><i>v</i></b><sub>女性</sub> ≈ <b><i>v</i></b><sub>女王</sub></span>
-      <span class="note">言葉は ℝ<sup><i>d</i></sup> のベクトル。近さ＝<b>余弦類似度</b>。「魔法の計算」＝右の式（Mikolov et al., 2013）</span>
+      <span class="note">言葉が<b>ベクトル（矢印）</b>になっているから、<b>足し算・引き算ができる</b>（Mikolov et al., 2013）→ 大学の<b>線形代数</b>。「魔法の計算」ボタンは<b>タップするたびに1段階</b>進みます</span>
     </div>
   </div>
 </section>
@@ -324,20 +322,34 @@
   <p class="gray" style="font-size:.62em; margin-top:.25em;">出典: Kaplan, J. et al. (2020). Scaling Laws for Neural Language Models. arXiv:2001.08361 ／ Hoffmann, J. et al. (2022). arXiv:2203.15556</p>
 </section>
 
-<!-- 10 アルゴリズム：損失関数と勾配降下 -->
+<!-- 10 アルゴリズム：学習のしくみ（タップで動くグラフ） -->
 <section class="slide">
   <div class="kicker">柱3　アルゴリズム</div>
-  <h2>学習のしくみ<span class="small">— 損失関数と勾配降下法</span></h2>
-  <div class="fmcard">
-    <span class="fm"><i>L</i>(<i>θ</i>) = −<span class="frac"><span class="nu">1</span><span class="de"><i>T</i></span></span> <span class="bigop"><span class="hi"><i>T</i></span><span class="op">Σ</span><span class="lo"><i>t</i>=1</span></span> log <i>P</i><sub><i>θ</i></sub>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>&lt;<i>t</i></sub>)</span>
-    <div class="fmread"><b>交差エントロピー損失</b>：正解の言葉に低い確率をつけるほど、罰点が増える</div>
+  <h2>学習のしくみ<span class="small">— 「罰点」が減る方向へ、少しずつ</span></h2>
+  <div class="cols" style="gap:.8em;">
+    <div class="col" style="flex:1.55;">
+      <svg id="lossFig" viewBox="0 0 640 330" style="width:100%; background:#fff; border:2px solid var(--tint); border-radius:.4em; cursor:pointer;" role="img" aria-label="学習のしくみの図。タップするたびに、罰点のグラフの上で傾きが表示され、玉が谷底へ1歩ずつ下りる">
+        <line x1="50" y1="295" x2="622" y2="295" stroke="#6b7280" stroke-width="2"/>
+        <line x1="50" y1="295" x2="50" y2="24" stroke="#6b7280" stroke-width="2"/>
+        <polygon points="622,295 612,290 612,300" fill="#6b7280"/>
+        <polygon points="50,24 45,34 55,34" fill="#6b7280"/>
+        <text x="600" y="318" font-size="16" fill="#6b7280" text-anchor="end">パラメータ θ の値</text>
+        <text x="24" y="160" font-size="16" fill="#6b7280" text-anchor="middle" transform="rotate(-90 24 160)">罰点 L（損失）</text>
+        <path d="M 90,55.0 L 110,81.2 L 130,105.7 L 150,128.4 L 170,149.4 L 190,168.6 L 210,186.1 L 230,201.9 L 250,215.8 L 270,228.1 L 290,238.6 L 310,247.3 L 330,254.3 L 350,259.5 L 370,263.0 L 390,264.8 L 410,264.8 L 430,263.0 L 450,259.5 L 470,254.3 L 490,247.3 L 510,238.6 L 530,228.1 L 550,215.8 L 570,201.9 L 590,186.1 L 610,168.6" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
+        <line id="lossTan" x1="0" y1="0" x2="0" y2="0" stroke="var(--amber-dark)" stroke-width="3.5" opacity="0"/>
+        <text id="lossTanLbl" x="0" y="0" font-size="17" fill="var(--amber-dark)" font-weight="bold" opacity="0">傾き</text>
+        <circle id="lossBall" cx="120" cy="82" r="11" fill="var(--amber)" stroke="#b97a14" stroke-width="2"/>
+        <text id="lossMsg" x="360" y="52" font-size="18" text-anchor="middle" font-weight="bold" fill="var(--teal-dark)">タップしてスタート</text>
+      </svg>
+      <div class="figcap">タップで1歩ずつ：傾きを見る → 罰点が減る方向へ動く → くり返す</div>
+    </div>
+    <div class="col" style="gap:.5em;">
+      <div class="fmcard" style="margin:0;"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> × 傾き</span>
+        <div class="fmread">傾きのぶんだけ、罰点が減る方向へ動かす（<i>η</i> ＝ 1歩の大きさ）</div></div>
+      <div class="card" style="font-size:.78em; margin:0;">「傾き」を式で求める方法が<b>微分</b>。まだ習っていなくても大丈夫 — <b>今日は絵で分かればOK</b></div>
+      <div class="card warm" style="font-size:.78em; margin:0;"><b class="accent">学習の正体：</b>これを<b>数十億個のパラメータ</b>で、何兆回もくり返す（大学では<b>偏微分 ∂</b> として習う → 解析学）</div>
+    </div>
   </div>
-  <div class="fmcard" style="background:var(--amber-tint); margin-top:.45em;">
-    <span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> <span class="frac"><span class="nu">∂<i>L</i></span><span class="de">∂<i>θ</i></span></span></span>
-    <div class="fmread"><b>勾配降下法</b>：罰点を<b>偏微分</b>して、減る方向に数十億個のパラメータ <i>θ</i> を少しずつ動かす（<i>η</i> ＝ 学習率）</div>
-  </div>
-  <p style="margin-top:.5em;">「学習」の正体は、<b>微分して、下る</b>。それを何兆回もくり返す</p>
-  <p class="teal" style="font-size:.8em; margin-top:.3em;">∂（偏微分）は高校の微分の親戚 — 正体は大学1年の「解析学」で習います</p>
 </section>
 
 <!-- 11 ベンチマーク（MMLU）＋投票 -->
@@ -383,7 +395,7 @@
     </div>
   </div>
   <div class="fmbar" style="margin-top:.35em; font-size:.6em;">
-    <span style="font-size:1.3em;">📊</span><span class="note">AIはもう、ふつうの道具 — 学校でも生成AIが使えるようになってきています。ここで投票！　<b>①よく使っているAIは？</b>　<b>②じつは、これもAIです</b></span>
+    <span style="font-size:1.3em;">📊</span><span class="note">AIはもう、ふつうの道具 — 学校でも生成AIが使えるようになってきています（はじめの投票①でも、使っている人が多かったですね）</span>
   </div>
 </section>
 
@@ -426,10 +438,11 @@
   <div class="card" style="font-size:.95em; padding:.8em 1em; line-height:1.6;">
     外部ライブラリなしの単一HTMLで、<b>もぐらたたきゲーム</b>を作ってください。絵文字のモグラが9個の穴からランダムに顔を出し、タップすると1点。<b>30秒間のスコア</b>を競えるようにしてください
   </div>
-  <ul class="big" style="margin-top:.6em;">
+  <ul class="big" style="margin-top:.5em;">
     <li class="accent">この全文が <b>slido</b> に → 長押しでコピーして、Geminiに貼ろう</li>
     <li>B〜Dの全文も slido にあります</li>
   </ul>
+  <div class="card warm" style="font-size:.74em; margin-top:.4em;"><b class="accent">ことばの意味</b>：<b>HTML</b>＝Webページのファイル／<b>単一HTML</b>＝1つのファイルに全部入り（だから貼るだけで動く）／<b>外部ライブラリ</b>＝他人が作った部品集（今日は使わない）<br><b class="teal">専門用語で正確に注文できること — これも「AIリテラシー」。大学で学ぶ意義のひとつです</b></div>
 </section>
 
 
@@ -528,7 +541,8 @@
   </div>
   <p style="margin-top:.35em;">AIから「こうしたら？」と提案された人、いませんか。あれが入り口です</p>
   <p class="teal" style="margin-top:.35em;">人の仕事は「<b>何を作りたいか</b>」を決めること</p>
-  <div class="card" style="font-size:.72em; margin:.4em 0 0;"><b class="teal">これも「測って」います</b>：実PC操作ベンチマーク <b>OSWorld</b> — エージェント 2024年 <b>12.2%</b> → 2026年 <b>90.2%</b>（人間の目安 72.4%）<span class="gray">　※2026年値は改訂版 OSWorld-Verified。出典: Xie et al. (2024) NeurIPS ／ 公式リーダーボード 2026-08</span></div>
+  <div class="card" style="font-size:.7em; margin:.35em 0 0;"><b class="teal">測ると</b>：実PC操作テスト <b>OSWorld</b>（ファイル整理・アプリ操作など、<b>決められた作業</b>の達成率）— 2024年 <b>12.2%</b> → 2026年 <b>90.2%</b>。人間の平均 72.4% を<b>この達成率で</b>上回った<span class="gray">　※2026年値は改訂版 OSWorld-Verified。出典: Xie et al. (2024) NeurIPS／公式リーダーボード</span></div>
+  <div class="card warm" style="font-size:.7em; margin:.3em 0 0;"><b class="accent">でも、仕事はまだ置き換わらない</b> — テストにあるのは「はっきり決まった作業」だけ。<b>何を作るか決める／責任を持つ／例外に対応する</b>は、人間の仕事のまま。それに、AIは<b>たまに大きく間違える</b></div>
 </section>
 
 <!-- 21 数学の回収（式再掲） -->
@@ -540,16 +554,16 @@
     <div class="mh">数学としての正体</div>
     <div class="mh">大学1年の必修</div>
 
-    <div class="mc"><span class="fm">ℝ<sup><i>d</i></sup>・cos(<b><i>u</i></b>,<b><i>v</i></b>)</span><br><span class="gray">🗺️ 単語埋め込み</span></div>
-    <div class="mc real">ベクトル・内積<br><span class="gray">数百〜数千次元の空間</span></div>
+    <div class="mc"><span class="fm"><b><i>v</i></b><sub>王様</sub> − <b><i>v</i></b><sub>男性</sub> + <b><i>v</i></b><sub>女性</sub></span><br><span class="gray">🗺️ 単語埋め込み</span></div>
+    <div class="mc real">ベクトルの足し算・引き算<br><span class="gray">本物は数百〜数千次元</span></div>
     <div class="mc sub">線形代数学1</div>
 
-    <div class="mc"><span class="fm">∏ <i>P</i>(<i>w</i><sub><i>t</i></sub>|<i>w</i><sub>&lt;<i>t</i></sub>)・softmax</span><br><span class="gray">🎲 次トークン予測</span></div>
-    <div class="mc real">確率・統計<br><span class="gray">条件付き確率・分布</span></div>
+    <div class="mc"><span class="fm"><i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>&lt;<i>t</i></sub>)</span><br><span class="gray">🎲 次トークン予測</span></div>
+    <div class="mc real">条件付き確率<br><span class="gray">確率で1語ずつ選ぶ</span></div>
     <div class="mc sub">統計確率A</div>
 
-    <div class="mc"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> ∂<i>L</i>/∂<i>θ</i></span><br><span class="gray">学習（勾配降下法）</span></div>
-    <div class="mc real">微分（偏微分）<br><span class="gray">傾きを見て、下る</span></div>
+    <div class="mc"><span class="fm"><i>θ</i> ← <i>θ</i> − <i>η</i> × 傾き</span><br><span class="gray">学習（勾配降下法）</span></div>
+    <div class="mc real">微分＝傾きを求める<br><span class="gray">大学では偏微分 ∂</span></div>
     <div class="mc sub">解析学1</div>
   </div>
   <p class="accent" style="margin-top:.45em;">今日の式は、1年生で <b>ぜんぶ必修</b> — さわった教材の先に、そのまま続いています</p>
@@ -676,7 +690,7 @@
 
   /* --- 進行ストップウォッチ ---------------------------------------------
      開始時刻が読めないので、時計ではなく「授業が始まってからの経過」で進行を見る。
-     経過時間と、34分プランに対する進み/遅れを出す。
+     経過時間と、35分プランに対する進み/遅れを出す。
      クリック=開始/一時停止、ダブルクリック=リセット、T キー=表示の切替。 */
   var swBox = document.createElement("div");
   swBox.id = "stopwatch";
@@ -684,9 +698,9 @@
   swBox.title = "クリック: 開始/一時停止　ダブルクリック: リセット　T: 表示切替";
   document.body.appendChild(swBox);
 
-  /* 各スライドに入っているはずの経過秒（34分プラン）。25は投影のみ、26・27は予備なので目安を置かない */
+  /* 各スライドに入っているはずの経過秒（35分プラン）。25は投影のみ、26・27は予備なので目安を置かない */
   var SW_PLAN = [
-    0, 45, 90, 210, 270, 360, 480, 630, 690, 780, 840, 930, 990, 1020, 1080, 1110, 1170,
+    0, 45, 90, 240, 300, 390, 510, 660, 720, 810, 900, 960, 1005, 1050, 1110, 1140, 1170,
     1200,                      /* 18 演習ここから10分 */
     1800, 1860, 1920, 1980, 2010, 2070, null, null, null
   ];
@@ -803,6 +817,67 @@
     shot.addEventListener("click", function () {
       shot.classList.toggle("z");
       cap.innerHTML = shot.classList.contains("z") ? ZOOM : WIDE;
+    });
+  })();
+
+  /* 10枚目: 学習のしくみ。タップごとに「傾きを見る → 玉が1歩下る」を繰り返す。
+     微分を未習の生徒がいる前提で、傾き＝どちらへ動くと罰点が減るか、を絵で見せる。 */
+  (function () {
+    var fig = document.getElementById("lossFig");
+    if (!fig) return;
+    var ball = document.getElementById("lossBall");
+    var tan = document.getElementById("lossTan");
+    var lbl = document.getElementById("lossTanLbl");
+    var msg = document.getElementById("lossMsg");
+    var K = 0.002185, H = 400, V = 265;
+    function Y(x) { return V - K * (x - H) * (x - H); }
+    function slope(x) { return 2 * K * (H - x); }
+    var XS = [120, 210, 285, 340, 375, 395];
+    var i = 0, busy = false, done = false;
+    function place(x) { ball.setAttribute("cx", x); ball.setAttribute("cy", Y(x) - 11); }
+    function showTan(x) {
+      var m = slope(x), y = Y(x), dx = 58;
+      tan.setAttribute("x1", x - dx); tan.setAttribute("y1", y - m * dx);
+      tan.setAttribute("x2", x + dx); tan.setAttribute("y2", y + m * dx);
+      lbl.setAttribute("x", x + 14); lbl.setAttribute("y", y - 24);
+      tan.setAttribute("opacity", 1); lbl.setAttribute("opacity", 1);
+    }
+    function hideTan() { tan.setAttribute("opacity", 0); lbl.setAttribute("opacity", 0); }
+    function roll(from, to, cb) {
+      /* rAF はバックグラウンドや省電力時に止まりうるので、タイマー駆動にする */
+      var k = 0, N = 40;
+      var iv = setInterval(function () {
+        k++;
+        var p = k / N;
+        p = p * (2 - p); /* ease-out */
+        place(from + (to - from) * p);
+        if (k >= N) { clearInterval(iv); cb(); }
+      }, 16);
+    }
+    place(XS[0]);
+    fig.addEventListener("click", function () {
+      if (busy) return;
+      if (done) {
+        done = false; i = 0; hideTan(); place(XS[0]);
+        msg.textContent = "タップしてスタート";
+        return;
+      }
+      busy = true;
+      showTan(XS[i]);
+      msg.textContent = "① 傾きを見る（＝微分）…";
+      setTimeout(function () {
+        msg.textContent = "② 罰点が減る方向へ、1歩！";
+        roll(XS[i], XS[i + 1], function () {
+          hideTan(); i++;
+          if (i >= XS.length - 1) {
+            done = true;
+            msg.textContent = "谷底に到着 ＝ 罰点が最小 ＝ 学習の完了！（タップでもう一度）";
+          } else {
+            msg.textContent = "くり返す（のこり " + (XS.length - 1 - i) + " 歩）→ タップ";
+          }
+          busy = false;
+        });
+      }, 700);
     });
   })();
 
