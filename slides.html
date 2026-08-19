@@ -196,19 +196,19 @@
   <div class="teal" style="font-size:1em;">生成AIプログラミング体験 2026</div>
   <h1 style="font-size:2.4em; font-weight:800; margin:.35em 0;">AIに「注文」して<br>アプリを作ろう！</h1>
   <div class="gray" style="font-size:.85em; margin-bottom:1.2em;">体験授業（30分）</div>
-  <div style="font-weight:700; font-size:.95em;">筑波技術大学　産業技術学部　産業情報学科<br>教授　博士（情報科学）　白石 優旗</div>
+  <div style="font-weight:700; font-size:.95em;">筑波技術大学　産業技術学部　産業情報学科<br><span style="font-size:.85em;">情報科学コース・情報保障工学領域</span><br>教授　博士（情報科学）　白石 優旗</div>
 </section>
 
 <!-- 2 自己紹介 -->
 <section class="slide">
   <h2>白石 優旗<span class="small">（しらいし ゆうき）</span></h2>
   <img src="assets/avatar.png" alt="白石のアバター" style="position:absolute; top:5%; right:5%; height:22%; border-radius:.4em;">
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">所属</span><span>産業技術学部 産業情報学科<br>（情報科学コース・情報保障工学領域）</span></div>
   <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">出身</span><span>福岡県（県立鞍手高校 卒業）</span></div>
-  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">経歴</span><span>九州大学 博士（情報科学）→ 2013年から筑波技術大学（現在 教授）</span></div>
-  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">専門</span><span>人工知能（AI）／アクセシブル・テクノロジー／手話の認識・表記</span></div>
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">経歴</span><span>九州大学で博士（情報科学）→ 2013年から現職（教授）</span></div>
+  <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">専門</span><span>人工知能（AI）／手話認識<br>アクセシブル・テクノロジー</span></div>
   <div class="row"><span class="teal" style="width:5.2em; flex-shrink:0;">研究室</span><span>2年生から研究室に入れる「プレ卒研」制度あり</span></div>
   <p class="teal" style="margin-top:.5em;">キーワード：「聴覚障害当事者（学生）」「情報保障」</p>
-  <p style="margin-top:.6em;">「筑波技術大学　白石」で検索！</p>
 </section>
 
 <!-- 3 はじめに -->
@@ -220,7 +220,7 @@
         <li>注文文（プロンプト）は <b>slido</b> にある</li>
         <li>質問も slido へ。<b>名前は書かなくてOK</b></li>
         <li><b>保護者の方も、ご自身のスマホでご参加を</b></li>
-        <li><b>練習</b>：slidoに<b>投票が2問</b>出ている。いま答えてみよう<br><span class="gray" style="font-size:.8em;">①よく使っているAIは？　②じつは、これもAIです</span></li>
+        <li><b>練習</b>：slidoに<b>投票が2問</b>出ている。いま答えてみよう<br><span class="gray" style="font-size:.8em;">① よく使っているAIは？<br>② じつは、これもAIです</span></li>
       </ul>
     </div>
     <div class="col" style="flex:0 0 38%; display:flex; flex-direction:column; align-items:center; gap:.4em;">
@@ -233,19 +233,19 @@
 <section class="slide">
   <h2>本日の目標 <span class="small">— 大学の情報系は「楽しくて、深い」</span></h2>
   <div class="card"><span class="num">1</span><b>楽しい：</b>AIに「注文」して、自分のアプリを作る</div>
-  <div class="card"><span class="num">2</span><b>深い：</b>LLMのしくみを、さわって理解する（本物の式も<b>1つだけ</b>）</div>
-  <div class="card"><span class="num">3</span><b>大切：</b>AIの便利さと限界を体感する — <b>AIリテラシーの第一歩</b></div>
+  <div class="card"><span class="num">2</span><b>深い：</b>LLMのしくみを、さわって理解する（<b>式は1本</b>）</div>
+  <div class="card"><span class="num">3</span><b>大切：</b>便利さと限界を体感 — <b>AIリテラシーの第一歩</b></div>
 </section>
 
 <!-- 5 LLMの定義（式1: 自己回帰） -->
 <section class="slide">
   <div class="kicker">AIの正体</div>
-  <h2>大規模言語モデル（LLM）<span class="small">＝「次のトークン」の確率を計算する関数</span></h2>
+  <h2>大規模言語モデル（LLM）<span class="small">＝「次の言葉」の確率を計算する関数</span></h2>
   <div class="fmcard">
     <span class="fm"><i>P</i>(<i>w</i><sub><i>t</i></sub> | <i>w</i><sub>1</sub>, …, <i>w</i><sub><i>t</i>−1</sub>)</span>
     <div class="fmread">読み下し：「ここまでの言葉」を条件にした、「次の言葉 <i>w</i><sub><i>t</i></sub>」の確率（<b>条件付き確率</b>）。今日の式は、これ1本だけ</div>
   </div>
-  <div class="card warm" style="font-size:.8em; margin-top:.45em;"><b class="accent">これが「言語モデル」という考え方</b>　文の「自然さ」を確率で表す。すると——<b>① ヘンな文と自然な文を見分けられる</b>　<b>② 確率にしたがって選び続ければ、自然な文を作れる</b>（＝生成AI）</div>
+  <div class="card warm" style="font-size:.8em; margin-top:.45em;"><b class="accent">これが「言語モデル」という考え方</b>　文の「自然さ」を確率で表す。すると——<br>① ヘンな文と自然な文を<b>見分けられる</b><br>② 確率にしたがって選び続ければ、自然な文を<b>作れる</b>（＝生成AI）</div>
   <div class="card" style="font-size:.8em; margin-top:.4em;"><b class="teal">用語：自己回帰（autoregressive）</b>　この確率で1語えらぶ → 文にたす → また計算する。このくり返しで②を実行する</div>
   <p style="margin-top:.35em; font-size:.92em;">大量の文章から、この確率を学習した。<b class="accent">確率で動く ＝ ガチャ</b>。次のページで、指でさわって確かめる</p>
 </section>
@@ -376,7 +376,7 @@
         <line x1="60" y1="266" x2="505" y2="266" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6 5"/>
         <text x="500" y="261" font-size="13" fill="#6b7280" text-anchor="end">ランダム 25%</text>
         <line x1="60" y1="66" x2="505" y2="66" stroke="#d6336c" stroke-width="1.5" stroke-dasharray="6 5"/>
-        <text x="500" y="61" font-size="13" fill="#d6336c" text-anchor="end">人間の専門家（推定）89.8%</text>
+        <text x="68" y="57" font-size="13" fill="#d6336c">人間の専門家（推定）89.8%</text>
         <polyline points="90,208 158,158 226,135 294,76 430,56" fill="none" stroke="var(--teal)" stroke-width="3.5"/>
         <g fill="var(--teal-dark)">
           <circle cx="90" cy="208" r="6"/><circle cx="158" cy="158" r="6"/><circle cx="226" cy="135" r="6"/>
@@ -425,14 +425,14 @@
   <h2>メニューから選んで、AIに注文しよう</h2>
   <div class="cols" style="flex:0 0 auto; margin-bottom:.5em;">
     <div class="card col" style="margin:0;"><b>🐹 A. もぐらたたき</b><br><span style="font-size:.8em;">定番アクション。まずはこれ！</span></div>
-    <div class="card col" style="margin:0;"><b>🥠 B. おみくじ</b><br><span style="font-size:.8em;">いちばん かんたん</span></div>
+    <div class="card col" style="margin:0;"><b>🥠 B. おみくじ</b><br><span style="font-size:.8em;">いちばん簡単</span></div>
   </div>
   <div class="cols" style="flex:0 0 auto;">
-    <div class="card col" style="margin:0;"><b>⚡ C. 反応速度</b><br><span style="font-size:.8em;">昨年のリベンジ</span></div>
-    <div class="card warm col" style="margin:0;"><b>🚀 D. 自由×エージェント風</b><br><span style="font-size:.8em;">経験者むけ（あとで説明）</span></div>
+    <div class="card col" style="margin:0;"><b>⚡ C. 反応速度</b><br><span style="font-size:.8em;">反射神経で勝負したい人</span></div>
+    <div class="card warm col" style="margin:0;"><b>🚀 D. 自由×エージェント風</b><br><span style="font-size:.8em;">経験者向け（やり方は下）</span></div>
   </div>
   <p class="accent" style="margin-top:.55em;">注文文の全文は <b>slido</b> に → 長押しでコピーしよう！</p>
-  <div class="card warm" style="margin:.45em 0 0; font-size:.76em;"><b class="accent">Dのやり方（経験者・2段階注文）</b>：①「面白いミニゲームの<b>仕様を3行で提案して</b>」→ ②「その仕様を<b>単一HTMLで実装して</b>」— 計画から実装まで、AIに任せる（エージェント風）</div>
+  <div class="card warm" style="margin:.45em 0 0; font-size:.76em;"><b class="accent">Dのやり方（経験者・2段階注文）</b><br>①「面白いミニゲームの<b>仕様を3行で提案して</b>」→ ②「その仕様を<b>単一HTMLで実装して</b>」<br>計画から実装まで、AIに任せる（エージェント風）</div>
 </section>
 
 <!-- 14 注文の例 -->
@@ -459,17 +459,17 @@
   <p class="gray" style="font-size:.8em; margin-top:.4em;">※ 当日の画面例は、授業内で投影します</p>
 </section>
 
-<!-- 16 ステップ2 うごかそう -->
+<!-- 16 ステップ2 動かそう -->
 <section class="slide">
   <div class="kicker">ステップ2</div>
-  <h2>うごかそう</h2>
+  <h2>動かそう</h2>
   <div class="card" style="padding:.7em 1em;">
     <b style="font-size:1.05em;">基本：Geminiの画面の中で、そのまま動く！</b><br>
     <span style="font-size:.85em;">生成されると「プレビュー（Canvas）」が出る → タップして遊べる。そのまま追加注文もOK</span>
   </div>
   <p class="accent" style="margin-top:.5em; margin-bottom:.4em;">コードだけが出てきたら、AIにこう言ってみよう</p>
   <div class="card warm" style="font-weight:800; font-size:1.05em; padding:.6em .9em;">この画面でそのまま遊べるようにして</div>
-  <p class="gray" style="font-size:.85em; margin-top:.45em;">それでもダメなら → もう一度おなじ注文／新しいチャットでやり直す／かんたんな B に切りかえる／先生を呼ぶ</p>
+  <p class="gray" style="font-size:.85em; margin-top:.45em;">それでもダメなら → もう一度同じ注文／新しいチャットでやり直す／簡単な B に切りかえる／先生を呼ぶ</p>
 </section>
 
 <!-- 17 追加注文と共有 -->
@@ -496,7 +496,7 @@
     <div class="col" style="flex:1.9; display:flex; flex-direction:column; gap:.45em;">
       <div class="card" style="margin:0; font-size:.8em;">
         <b class="teal">メニュー（全文は slido）</b><br>
-        🐹 A. もぐらたたき　🥠 B. おみくじ（かんたん）　⚡ C. 反応速度　🚀 D. 自由×エージェント風
+        🐹 A. もぐらたたき　🥠 B. おみくじ（簡単）　⚡ C. 反応速度　🚀 D. 自由×エージェント風
       </div>
       <div class="card" style="margin:0; font-size:.8em;">
         <b class="teal">コツ</b><br>
@@ -505,10 +505,10 @@
         🌱 <b>注文のことばは、練習で上手くなる</b>
       </div>
       <div class="card warm" style="margin:0; font-size:.8em;">
-        <b class="accent">こまったら</b><br>
+        <b class="accent">困ったら</b><br>
         💡 <b>「この画面でそのまま遊べるようにして」</b>と送る<br>
         🔁 もう一度注文／🆕 新しいチャット<br>
-        🥠 かんたんなBに切りかえる<br>
+        🥠 簡単なBに切りかえる<br>
         👥 となりの人と見せ合う／🙋 先生を呼ぶ
       </div>
     </div>
@@ -623,17 +623,17 @@
   </div>
 </section>
 
-<!-- 24 さいごに -->
+<!-- 24 おわりに -->
 <section class="slide">
-  <h2>さいごに</h2>
+  <h2>おわりに</h2>
   <img src="assets/avatar.png" alt="白石のアバター" style="position:absolute; top:5%; right:5%; height:22%; border-radius:.4em;">
   <p style="margin-bottom:.5em;">AIは、あなたの「作りたい」をかなえる道具。</p>
   <p class="accent" style="margin-bottom:.5em;">みなさんは、はじめからAIがある世代。<br><b>新しい使い方は、みなさんが見つけてほしい</b></p>
   <p class="teal" style="font-size:1.1em; margin-bottom:.6em;">AIを駆使して、皆さんが主役となる<br>アクセシブルな未来を、共に創ろう</p>
-  <p style="font-size:1.25em; font-weight:800; margin-bottom:.8em;">「つづき」は筑波技術大学にて！！</p>
+  <p style="font-size:1.25em; font-weight:800; margin-bottom:.8em;">「続き」は筑波技術大学で</p>
   <div style="display:flex; align-items:center; gap:1em;">
     <img src="assets/qr_lab.png" alt="研究室サイトQR" style="height:4.5em;">
-    <div>https://www.shiraishi-lab.org/<br><b>「筑波技術大学　白石」で検索！</b><br><span class="gray" style="font-size:.72em;">今日の教材は <b>おうちのネットから</b> 遊べる<br>yuhkis.github.io/taiken2026</span></div>
+    <div>https://www.shiraishi-lab.org/<br><b>「筑波技術大学　白石」で検索！</b><br><span class="gray" style="font-size:.72em;">今日の教材は <b>自宅のネットから</b> アクセスできる<br>yuhkis.github.io/taiken2026</span></div>
   </div>
 </section>
 
@@ -667,12 +667,12 @@
 
 <!-- 27 予備 こまったら -->
 <section class="slide">
-  <div class="kicker">こまったら</div>
+  <div class="kicker">困ったら</div>
   <h2>うまくいかないときは</h2>
   <div class="row"><span>🔁</span><span><b>もう一度お願いする</b>（結果は毎回変わる）</span></div>
   <div class="row"><span>🆕</span><span><b>新しいチャットでやり直す</b></span></div>
   <div class="row"><span>📋</span><span><b>コピーはコード右上の📋アイコンで</b></span></div>
-  <div class="row"><span>🥠</span><span><b>かんたんな B（おみくじ）に切りかえる</b></span></div>
+  <div class="row"><span>🥠</span><span><b>簡単な B（おみくじ）に切りかえる</b></span></div>
   <div class="row"><span>👥</span><span><b>となりの人と見せ合う</b></span></div>
   <div class="row"><span>🙋</span><span><b>先生を呼ぼう</b>（slidoに書いてもOK）</span></div>
 </section>
